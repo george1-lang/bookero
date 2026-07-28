@@ -1,12 +1,14 @@
 package com.bookero.flight;
 
+import com.bookero.common.AssignedIdEntity;
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "fare_class")
-public class FareClassEntity {
+public class FareClassEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

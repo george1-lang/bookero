@@ -1,0 +1,75 @@
+.splitFlap {
+  display: flex;
+  gap: 1px;
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.1em;
+}
+
+.cell {
+  position: relative;
+  width: 28px;
+  height: 36px;
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--amber);
+  overflow: hidden;
+}
+
+.face {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+}
+
+.seam {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--line);
+  z-index: 1;
+}
+
+.flipping .face {
+  animation: flipCell 0.3s ease-in-out;
+}
+
+@keyframes flipCell {
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(180deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flipping .face {
+    animation: fadeFace 0.3s ease-in-out;
+  }
+
+  @keyframes fadeFace {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}

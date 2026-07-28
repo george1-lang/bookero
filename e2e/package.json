@@ -1,0 +1,16 @@
+{
+  "name": "bookero-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "End-to-end tests for the Bookero stack: API contract, full booking loop, and browser journeys",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test --project=api",
+    "test:ui": "playwright test --project=chromium",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

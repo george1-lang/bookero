@@ -1,5 +1,7 @@
 package com.bookero.pricing;
 
+import com.bookero.common.AssignedIdEntity;
+
 import com.bookero.flight.FlightEntity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -8,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "price_history")
-public class PriceHistoryEntity {
+public class PriceHistoryEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

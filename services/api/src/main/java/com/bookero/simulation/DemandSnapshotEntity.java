@@ -1,5 +1,7 @@
 package com.bookero.simulation;
 
+import com.bookero.common.AssignedIdEntity;
+
 import com.bookero.flight.FlightEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -7,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "demand_snapshot")
-public class DemandSnapshotEntity {
+public class DemandSnapshotEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

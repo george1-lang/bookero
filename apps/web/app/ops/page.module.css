@@ -1,0 +1,209 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+  overflow-y: auto;
+  gap: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.title {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0;
+}
+
+.navLinks {
+  display: flex;
+  gap: 16px;
+}
+
+.navLink {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  border: 1px solid var(--line);
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.navLink:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.error {
+  background: rgba(255, 66, 66, 0.1);
+  border-left: 2px solid var(--stop);
+  color: var(--stop);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.inventoryTable {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  overflow-x: auto;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+
+:global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+:global(thead) {
+  background: var(--ink-900);
+}
+
+:global(th) {
+  padding: 12px;
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border-bottom: 1px solid var(--line-hi);
+  font-size: 10px;
+}
+
+:global(td) {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--paper);
+}
+
+:global(tbody tr) {
+  transition: all 0.2s;
+}
+
+:global(tbody tr:hover) {
+  background: var(--ink-700);
+  border-left: 2px solid var(--amber);
+}
+
+.flightNo {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-weight: 700;
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+}
+
+.route {
+  font-size: 11px;
+  color: var(--fog-200);
+}
+
+.mono {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
+
+.loadFactorBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  padding: 0 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.loadFactorFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--go),
+    var(--amber),
+    var(--signal)
+  );
+  opacity: 0.3;
+  transition: width 0.3s;
+}
+
+.loadFactorLabel {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.fareClasses {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fareClass {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 10px;
+}
+
+.code {
+  color: var(--amber);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.price {
+  color: var(--fog-200);
+  font-variant-numeric: tabular-nums;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 80px 40px;
+  color: var(--fog-200);
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

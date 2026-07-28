@@ -1,5 +1,7 @@
 package com.bookero.airport;
 
+import com.bookero.common.AssignedIdEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -7,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "airport")
-public class AirportEntity {
+public class AirportEntity extends AssignedIdEntity<String> {
     @Id
     private String code;
 
@@ -81,4 +83,8 @@ public class AirportEntity {
     public void setLon(Double lon) {
         this.lon = lon;
     }
+  @Override
+  public String getId() {
+    return getCode();
+  }
 }

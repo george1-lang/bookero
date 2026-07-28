@@ -1,0 +1,222 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+  overflow-y: auto;
+  gap: 32px;
+}
+
+.offlineBanner {
+  background: rgba(255, 91, 41, 0.1);
+  border-left: 2px solid var(--signal);
+  color: var(--signal);
+  padding: 12px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.title {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0;
+}
+
+.navLink {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  border: 1px solid var(--line);
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.navLink:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+
+.kpiCard {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.kpiCard.positive {
+  border-color: var(--go);
+  background: rgba(78, 216, 143, 0.05);
+}
+
+.kpiCard.negative {
+  border-color: var(--stop);
+  background: rgba(255, 66, 66, 0.05);
+}
+
+.kpiLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fog-400);
+  margin-bottom: 8px;
+}
+
+.kpiValue {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiPercent {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  color: var(--go);
+}
+
+.kpiCard.negative .kpiPercent {
+  color: var(--stop);
+}
+
+.chartSection {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+.chartTitle {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.chartContainer {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+.routeBreakdown {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+.sectionTitle {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+:global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+:global(th) {
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border-bottom: 1px solid var(--line-hi);
+  padding: 8px 0;
+  font-size: 10px;
+}
+
+:global(td) {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--paper);
+}
+
+:global(tbody tr:hover) {
+  background: var(--ink-700);
+}
+
+.mono {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.footer {
+  text-align: right;
+  font-size: 10px;
+  color: var(--fog-400);
+  letter-spacing: 0.05em;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

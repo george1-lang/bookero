@@ -1,0 +1,63 @@
+.wrap {
+  margin: 2rem 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(var(--ink-900), var(--ink-900)) padding-box,
+    repeating-linear-gradient(0deg, var(--line) 0 1px, transparent 1px 24px) border-box;
+  position: relative;
+}
+
+/* Crop marks: the panel is defined by corner ticks, not by a shadow. */
+.wrap::before,
+.wrap::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-color: var(--amber);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.wrap::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.wrap::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+.caption {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.canvas {
+  padding: 1.25rem;
+  overflow-x: auto;
+}
+
+.canvas :global(svg) {
+  max-width: 100%;
+  height: auto;
+}
+
+.fallback {
+  margin: 0;
+  padding: 1rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  color: var(--fog-200);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}

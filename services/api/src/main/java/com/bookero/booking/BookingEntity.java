@@ -1,5 +1,7 @@
 package com.bookero.booking;
 
+import com.bookero.common.AssignedIdEntity;
+
 import com.bookero.auth.UserEntity;
 import com.bookero.flight.FareClassEntity;
 import com.bookero.flight.FlightEntity;
@@ -10,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "booking")
-public class BookingEntity {
+public class BookingEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

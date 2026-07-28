@@ -1,12 +1,14 @@
 package com.bookero.route;
 
+import com.bookero.common.AssignedIdEntity;
+
 import com.bookero.airport.AirportEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Table(name = "route")
-public class RouteEntity {
+public class RouteEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

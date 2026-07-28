@@ -1,0 +1,371 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 40px;
+  overflow-y: auto;
+  gap: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.backBtn {
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  cursor: pointer;
+  font-size: 12px;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.backLink {
+  display: inline-block;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  text-decoration: none;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.backLink:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.title {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0;
+}
+
+.error {
+  background: rgba(255, 66, 66, 0.1);
+  border-left: 2px solid var(--stop);
+  color: var(--stop);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.runPanel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 20px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+
+.runInfo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.infoLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fog-400);
+}
+
+.infoValue {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+}
+
+.runBtn {
+  padding: 12px 20px;
+  background: transparent;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.runBtn:hover:not(:disabled) {
+  background: rgba(255, 177, 0, 0.1);
+}
+
+.runBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.resultPanel {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+.resultTitle {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.resultMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.resultMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px;
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+}
+
+.resultMetric.positive {
+  border-color: var(--go);
+}
+
+.resultMetric.negative {
+  border-color: var(--stop);
+}
+
+.metricLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fog-400);
+  margin-bottom: 6px;
+}
+
+.metricValue {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+
+.metricValue.success {
+  color: var(--go);
+}
+
+.metricValue.failed {
+  color: var(--stop);
+}
+
+.resultMetric.positive .metricValue {
+  color: var(--go);
+}
+
+.resultMetric.negative .metricValue {
+  color: var(--stop);
+}
+
+.priceUpdates {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.updatesTitle {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 12px 0;
+}
+
+:global(table) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+:global(th) {
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border-bottom: 1px solid var(--line-hi);
+  padding: 8px 0;
+  font-size: 9px;
+}
+
+:global(td) {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--paper);
+}
+
+.mono {
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 10px;
+}
+
+.positive {
+  color: var(--go);
+}
+
+.negative {
+  color: var(--stop);
+}
+
+.message {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--fog-200);
+}
+
+.docPanel {
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  padding: 24px;
+  animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+.markdown {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--paper);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-family: var(--font-display), "Archivo", sans-serif;
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: 0.05em;
+  margin: 24px 0 12px 0;
+  color: var(--amber);
+}
+
+.markdown h1 {
+  font-size: 20px;
+}
+
+.markdown h2 {
+  font-size: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.markdown h3 {
+  font-size: 14px;
+}
+
+.markdown p {
+  margin: 12px 0;
+}
+
+.markdown code {
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: var(--font-mono), "Martian Mono", monospace;
+  font-size: 11px;
+}
+
+.markdown pre {
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  padding: 12px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.markdown pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11px;
+}
+
+.markdown ul,
+.markdown ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.markdown li {
+  margin: 6px 0;
+}
+
+.markdown table {
+  margin: 12px 0;
+}
+
+.markdown td,
+.markdown th {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

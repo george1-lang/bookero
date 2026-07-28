@@ -20,4 +20,8 @@ public interface FlightRepository extends JpaRepository<FlightEntity, UUID> {
     List<FlightEntity> findByOriginDestAndDepartDate(String originCode, String destCode, Instant departDate);
 
     List<FlightEntity> findAllByDepartAtAfter(Instant departAt);
+
+    long countByRouteId(UUID routeId);
+
+    long countByDepartAtAfter(Instant departAt);
 }

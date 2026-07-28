@@ -1,12 +1,14 @@
 package com.bookero.inventory;
 
+import com.bookero.common.AssignedIdEntity;
+
 import com.bookero.flight.FlightEntity;
 import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Table(name = "inventory")
-public class InventoryEntity {
+public class InventoryEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID flightId;
 
@@ -62,4 +64,8 @@ public class InventoryEntity {
     public void setSeatsLeft(Integer seatsLeft) {
         this.seatsLeft = seatsLeft;
     }
+  @Override
+  public UUID getId() {
+    return getFlightId();
+  }
 }

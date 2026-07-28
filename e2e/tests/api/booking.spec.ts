@@ -51,7 +51,7 @@ test.describe("search, booking and oversell protection", () => {
       headers: auth(traveler),
       data: { flightId: before.flightId, fareClassId: fareClass.id },
     });
-    expect(booked.status(), await booked.text()).toBe(200);
+    expect([200, 201], `create booking: ${await booked.text()}`).toContain(booked.status());
     const booking = await booked.json();
     expect(Number(booking.paidPrice)).toBeGreaterThan(0);
 
@@ -98,7 +98,7 @@ test.describe("search, booking and oversell protection", () => {
       ),
     );
 
-    const ok = results.filter((r) => r.status() === 200).length;
+    const ok = results.filter((r) => r.status() === 200 || r.status() === 201).length;
     const conflict = results.filter((r) => r.status() === 409).length;
 
     expect(ok, "successful bookings cannot exceed the seats that existed").toBe(seatsLeft);

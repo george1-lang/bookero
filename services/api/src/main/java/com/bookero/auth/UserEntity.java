@@ -1,11 +1,13 @@
 package com.bookero.auth;
 
+import com.bookero.common.AssignedIdEntity;
+
 import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
 @Table(name = "app_user")
-public class UserEntity {
+public class UserEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

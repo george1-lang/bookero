@@ -1,5 +1,7 @@
 package com.bookero.flight;
 
+import com.bookero.common.AssignedIdEntity;
+
 import com.bookero.route.RouteEntity;
 import jakarta.persistence.*;
 import java.time.Instant;
@@ -7,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "flight")
-public class FlightEntity {
+public class FlightEntity extends AssignedIdEntity<UUID> {
     @Id
     private UUID id;
 

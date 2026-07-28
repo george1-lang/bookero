@@ -22,3 +22,13 @@ export SPRING_DATASOURCE_PASSWORD=bookero
 export DATABASE_URL="postgresql://bookero@127.0.0.1:5433/bookero"
 export ANALYTICS_BASE_URL="http://localhost:8001"
 export JWT_SECRET="bookero-dev-secret-change-me-32chars"
+
+# 8080 (pgAdmin) and 3000 are already taken on this workstation, so local runs
+# shift the API and web ports. Docker Compose still exposes the canonical ones.
+export SERVER_PORT=8090
+export API_PORT=8090
+export ANALYTICS_PORT=8001
+export WEB_PORT=3100
+export NEXT_PUBLIC_API_URL="http://localhost:8090"
+export NEXT_PUBLIC_ANALYTICS_URL="http://localhost:8001"
+export CORS_ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3100"

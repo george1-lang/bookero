@@ -21,6 +21,7 @@ data/processed/*
 !data/processed/.gitkeep
 pgdata/
 .localdb/
+.run/
 *.log
 .DS_Store
 Thumbs.db

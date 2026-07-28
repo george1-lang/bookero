@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: bookero-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/bookero}
+    username: ${SPRING_DATASOURCE_USERNAME:bookero}
+    password: ${SPRING_DATASOURCE_PASSWORD:bookero}
+    hikari:
+      maximum-pool-size: 16
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+  shutdown: graceful
+
+logging:
+  level:
+    com.bookero: INFO
+
+bookero:
+  jwt-secret: ${JWT_SECRET:bookero-dev-secret-change-me-32chars}
+  jwt-ttl-minutes: ${JWT_TTL_MINUTES:720}
+  analytics-base-url: ${ANALYTICS_BASE_URL:http://localhost:8001}
+  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  # Repricing after each booking keeps the demo loop visible; disable for load tests.
+  reprice-after-booking: ${REPRICE_AFTER_BOOKING:true}
+  reprice-after-booking-key: time_pressure_heuristic

@@ -1,0 +1,11 @@
+flowchart TD
+  Start([Load Route Graph]) --> Load["Load all routes"]
+  Load --> Build["Build adjacency list"]
+  Build --> UF["Initialize Union-Find"]
+  UF --> Union["Union endpoints of each route"]
+  Union --> Count["Count components"]
+  Count --> Degree["Compute node degrees"]
+  Degree --> FindHub["Find max-degree node"]
+  FindHub --> CalcAvg["Calculate average degree"]
+  CalcAvg --> Return["Return metrics"]
+  Return --> End([Done])

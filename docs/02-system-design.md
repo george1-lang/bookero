@@ -1,8 +1,8 @@
-# Phase 2: System Design — Bookero Architecture, API, and Data Model
+# Phase 2: System Design - Bookero Architecture, API, and Data Model
 
 **Date:** 2026-07-28  
-**Spec reference:** `docs/superpowers/specs/2026-07-28-bookero-design.md` §4–8  
-**Build reference:** `BUILD.md` §5–7
+**Spec reference:** `docs/superpowers/specs/2026-07-28-bookero-design.md` §4-8  
+**Build reference:** `BUILD.md` §5-7
 
 This document defines the complete runtime architecture, service boundaries, data model, API contracts, and deployment strategy for Bookero.
 
@@ -614,14 +614,14 @@ curl -X POST http://localhost:8080/api/auth/login \
 | Method | Path | Auth | Query | Response | Purpose |
 |--------|------|------|-------|----------|---------|
 | GET | `/api/flights/search` | authenticated | `origin`, `dest`, `date` | `{flightId, flightNo, departAt, inventory: {seatsTotal, seatsLeft}, fareClasses: [{id, code, basePrice, currentPrice, seatsAllocated}]}[]` | Search flights by route and date |
-| GET | `/api/flights/{id}` | authenticated | — | `{flightId, flightNo, departAt, routeId, fareClasses: [...]}` | Get flight detail with fare classes |
+| GET | `/api/flights/{id}` | authenticated | - | `{flightId, flightNo, departAt, routeId, fareClasses: [...]}` | Get flight detail with fare classes |
 
 ### Bookings (Traveler)
 
 | Method | Path | Auth | Request Body | Response | Purpose |
 |--------|------|------|-------------|----------|---------|
 | POST | `/api/bookings` | TRAVELER | `{flightId, fareClassId}` | `{bookingId, userId, flightId, fareClassId, paidPrice, createdAt}` | Create booking (transactional seat reduction) |
-| GET | `/api/bookings/me` | TRAVELER | — | `{bookingId, flightNo, departAt, fareClassCode, paidPrice, createdAt}[]` | List traveler's bookings |
+| GET | `/api/bookings/me` | TRAVELER | - | `{bookingId, flightNo, departAt, fareClassCode, paidPrice, createdAt}[]` | List traveler's bookings |
 
 **Booking response on success (HTTP 201):**
 ```json
@@ -650,7 +650,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 | Method | Path | Auth | Request Body | Response | Purpose |
 |--------|------|------|-------------|----------|---------|
 | POST | `/api/simulate` | ANALYST | `{intensity?: number}` | `{simulationId, flightsAffected, demandsCreated}` | Generate synthetic demand and booking pressure |
-| POST | `/api/simulate/seed` | ANALYST | — | `{flightsSeeded, fareClassesCreated}` | Seed ~20–40 reference flights on hub network |
+| POST | `/api/simulate/seed` | ANALYST | - | `{flightsSeeded, fareClassesCreated}` | Seed ~20-40 reference flights on hub network |
 
 ### Pricing (Analyst)
 
@@ -670,16 +670,16 @@ curl -X POST http://localhost:8080/api/pricing/reprice \
 
 | Method | Path | Auth | Query/Body | Response | Purpose |
 |--------|------|------|-----------|----------|---------|
-| GET | `/api/algorithms` | ANALYST | — | `{key, displayName, description}[]` | List all algorithm keys |
+| GET | `/api/algorithms` | ANALYST | - | `{key, displayName, description}[]` | List all algorithm keys |
 | POST | `/api/algorithms/{key}/run` | ANALYST | `{flightIds?: UUID[]}` | `{algorithmRunId, algorithmKey, durationMs, revenueDelta, status}` | Execute one algorithm (same as reprice endpoint) |
-| GET | `/api/algorithms/runs` | ANALYST | — | `{algorithmRunId, algorithmKey, durationMs, revenueDelta, status, createdAt}[]` | List recent algorithm runs |
+| GET | `/api/algorithms/runs` | ANALYST | - | `{algorithmRunId, algorithmKey, durationMs, revenueDelta, status, createdAt}[]` | List recent algorithm runs |
 
 ### Operations (Analyst)
 
 | Method | Path | Auth | Query | Response | Purpose |
 |--------|------|------|-------|----------|---------|
-| GET | `/api/ops/inventory` | ANALYST | — | `{flights: [{flightId, flightNo, departAt, seatsTotal, seatsLeft, bookingCount}]}` | View current inventory state |
-| GET | `/api/ops/metrics` | ANALYST | — | `{totalRevenue, baselineRevenue, loadFactor, avgFare, revenueByDay: [{date, revenue}]}` | Get revenue KPIs (proxies to Python analytics) |
+| GET | `/api/ops/inventory` | ANALYST | - | `{flights: [{flightId, flightNo, departAt, seatsTotal, seatsLeft, bookingCount}]}` | View current inventory state |
+| GET | `/api/ops/metrics` | ANALYST | - | `{totalRevenue, baselineRevenue, loadFactor, avgFare, revenueByDay: [{date, revenue}]}` | Get revenue KPIs (proxies to Python analytics) |
 
 ---
 

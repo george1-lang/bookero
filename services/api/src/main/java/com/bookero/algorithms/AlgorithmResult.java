@@ -43,4 +43,11 @@ public record AlgorithmResult(
         Map.of()
     );
   }
+
+  /** Attaches an advisory note (e.g. a degraded data source) without changing status. */
+  public AlgorithmResult withMessage(String note) {
+    return note == null ? this
+        : new AlgorithmResult(status, durationMs, revenueDelta, priceUpdates,
+            flightsAffected, note, metrics);
+  }
 }

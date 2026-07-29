@@ -73,7 +73,6 @@ class BookingServiceTest {
         flightRepository.deleteAll();
         routeRepository.deleteAll();
         airportRepository.deleteAll();
-        userRepository.deleteAll();
 
         AirportEntity originAirport = new AirportEntity("ACC", "Accra", "Accra", "Ghana", 5.6, -0.2);
         AirportEntity destAirport = new AirportEntity("LAD", "Luanda", "Luanda", "Angola", -8.8, 13.2);
@@ -104,13 +103,13 @@ class BookingServiceTest {
 
         UserEntity userEntity = new UserEntity(
             UUID.randomUUID(),
-            "traveler@bookero.local",
+            "booking-fixture@bookero.local",
             "hashed",
             Role.TRAVELER
         );
         userEntity = userRepository.save(userEntity);
         userId = userEntity.getId();
-        user = new AuthenticatedUser(userId, "traveler@bookero.local", Role.TRAVELER);
+        user = new AuthenticatedUser(userId, "booking-fixture@bookero.local", Role.TRAVELER);
     }
 
     @Test

@@ -27,7 +27,9 @@ spring:
       enabled: false
 
 server:
-  port: 8080
+  # PaaS platforms assign the listen port at runtime via PORT; SERVER_PORT stays
+  # available for local overrides, and 8080 is the Compose default.
+  port: ${PORT:${SERVER_PORT:8080}}
   shutdown: graceful
 
 logging:

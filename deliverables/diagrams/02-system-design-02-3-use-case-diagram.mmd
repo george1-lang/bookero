@@ -1,0 +1,19 @@
+flowchart LR
+  T((Traveler))
+  A((Revenue Analyst))
+  SYS((System))
+  S["Bookero"]
+
+  T -->|Search flights| S
+  T -->|View dynamic price| S
+  T -->|Book seat| S
+  T -->|View bookings| S
+
+  A -->|Run demand simulation| S
+  A -->|Trigger reprice| S
+  A -->|Inspect Algorithm Lab| S
+  A -->|View revenue dashboard| S
+  A -->|Export metrics| S
+
+  SYS -->|Inject synthetic demand| S
+  SYS -->|Optional light reprice| S

@@ -1,0 +1,23 @@
+stateDiagram-v2
+  [*] --> PENDING: POST /api/algorithms/{key}/run
+  PENDING --> RUNNING: AlgorithmRunService.execute()
+  RUNNING --> SUCCESS: Result complete,<br/>algorithm_run written
+  RUNNING --> FAILED: Exception thrown
+  SUCCESS --> [*]: Dashboard queries<br/>algorithm_run record
+  FAILED --> [*]: Error logged,<br/>last good prices<br/>kept, FAILED status
+  
+  note right of PENDING
+    Request queued
+  end note
+  
+  note right of RUNNING
+    Algorithm.execute()<br/>in progress
+  end note
+  
+  note right of SUCCESS
+    duration_ms,<br/>revenue_delta,<br/>price_history all<br/>written to DB
+  end note
+  
+  note right of FAILED
+    Algorithm exception<br/>caught, algorithm_run<br/>marked FAILED,<br/>old prices retained,<br/>error message stored
+  end note

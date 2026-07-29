@@ -1,15 +1,27 @@
 package com.bookero.algorithms;
 
 import com.bookero.flight.FareClassEntity;
-import com.bookero.inventory.InventoryEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Greedy nested protection. As a cabin fills, the cheapest buckets are withdrawn
+ * first so the remaining seats stay available to later, higher-yielding demand.
+ *
+ * <p>A bucket is withdrawn by lifting its fare to the next bucket up the ladder -
+ * the seat is still sellable, just no longer at a discount. Fares are never set to a
+ * sentinel value: a traveller must never be shown a price the airline would not honour.
+ */
 @Component
 public class GreedyProtectionAlgorithm implements Algorithm {
+
+  /** Load factor at which the i-th cheapest bucket closes. */
+  private static final double[] CLOSE_AT_LOAD = {0.55, 0.75, 0.90};
 
   @Override
   public String key() {
@@ -28,53 +40,61 @@ public class GreedyProtectionAlgorithm implements Algorithm {
 
   @Override
   public String description() {
-    return "Progressive protection: as load factor rises, close cheaper fare classes first.";
+    return "Withdraws discount buckets in ascending fare order as the cabin fills, lifting "
+        + "each closed bucket to the next fare up so late demand cannot buy cheap seats.";
   }
 
   @Override
   public AlgorithmResult execute(AlgorithmContext ctx) {
+    List<PriceUpdate> updates = new ArrayList<>();
+    Map<String, Integer> closuresByClass = new LinkedHashMap<>();
     var fareClasses = ctx.getFareClasses();
-    var inventory = ctx.getInventory();
-    var priceUpdates = new ArrayList<PriceUpdate>();
+    int flightsTouched = 0;
 
     for (var flightId : ctx.flightIds()) {
-      var fares = fareClasses.get(flightId);
-      var inv = inventory.get(flightId);
-      if (fares == null || inv == null) continue;
-
-      double loadFactor = (double) (inv.getSeatsTotal() - inv.getSeatsLeft()) / inv.getSeatsTotal();
-
-      // Sort by price ascending (cheap first)
-      var sortedFares = fares.stream()
-          .sorted(Comparator.comparing(FareClassEntity::getCurrentPrice))
-          .toList();
-
-      // Determine thresholds to close (heuristic: close cheapest as load rises)
-      int classesToClose = 0;
-      if (loadFactor > 0.9) {
-        classesToClose = Math.min(1, sortedFares.size() - 1);
-      } else if (loadFactor > 0.75) {
-        classesToClose = 0;
+      List<FareClassEntity> ladder = Fares.byBaseFareAscending(fareClasses.getOrDefault(flightId, List.of()));
+      if (ladder.size() < 2) {
+        continue;
       }
 
-      for (int i = 0; i < classesToClose && i < sortedFares.size(); i++) {
-        var fare = sortedFares.get(i);
-        // Set to very high price to effectively close it (but not zero)
-        var newPrice = BigDecimal.valueOf(99999.99);
-
-        if (!fare.getCurrentPrice().equals(newPrice)) {
-          priceUpdates.add(new PriceUpdate(
-              flightId,
-              fare.getFlight().getFlightNo(),
-              fare.getCode(),
-              fare.getCurrentPrice(),
-              newPrice
-          ));
+      double loadFactor = ctx.loadFactor(flightId);
+      int closed = 0;
+      for (int i = 0; i < ladder.size() - 1 && i < CLOSE_AT_LOAD.length; i++) {
+        if (loadFactor >= CLOSE_AT_LOAD[i]) {
+          closed++;
         }
+      }
+
+      boolean moved = false;
+      for (int i = 0; i < ladder.size(); i++) {
+        FareClassEntity fare = ladder.get(i);
+        BigDecimal target = i < closed
+            // Withdrawn: priced at the next bucket up, so the discount disappears.
+            ? ladder.get(i + 1).getBasePrice()
+            : fare.getBasePrice();
+
+        if (Fares.moved(fare, target)) {
+          updates.add(Fares.update(fare, target));
+          moved = true;
+        }
+      }
+
+      if (closed > 0) {
+        closuresByClass.merge(ladder.get(0).getCode(), closed, Integer::sum);
+      }
+      if (moved) {
+        flightsTouched++;
       }
     }
 
-    Map<String, Object> metrics = Map.of("faresProtected", (Object) priceUpdates.size());
-    return AlgorithmResult.success(0L, BigDecimal.ZERO, priceUpdates, ctx.flightIds().size(), metrics);
+    return AlgorithmResult.success(
+        0L,
+        BigDecimal.ZERO,
+        updates,
+        flightsTouched,
+        Map.of(
+            "bucketsWithdrawn", updates.size(),
+            "closureThresholds", CLOSE_AT_LOAD,
+            "closuresByLowestClass", closuresByClass));
   }
 }

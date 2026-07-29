@@ -11,6 +11,7 @@ import com.bookero.inventory.InventoryEntity;
 import com.bookero.inventory.InventoryRepository;
 import com.bookero.auth.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,10 +107,11 @@ public class BookingService {
 
         return new BookingResponseDto(
             bookingId,
-            user.id(),
             flightId,
+            flight.getFlightNo(),
             fareClassId,
-            fareClass.getCurrentPrice(),
+            fareClass.getCode(),
+            booking.getPaidPrice(),
             booking.getCreatedAt()
         );
     }
@@ -119,11 +121,10 @@ public class BookingService {
      */
     @Transactional(readOnly = true)
     public List<BookingListItemDto> getMyBookings(UUID userId, int page, int size) {
-        List<BookingEntity> bookings = bookingRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
+        var bookings = bookingRepository.findAllByUserIdOrderByCreatedAtDesc(
+            userId, PageRequest.of(Math.max(0, page), Math.clamp(size, 1, 200)));
 
         return bookings.stream()
-            .skip((long) page * size)
-            .limit(size)
             .map(b -> new BookingListItemDto(
                 b.getId(),
                 b.getFlight().getFlightNo(),

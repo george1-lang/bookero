@@ -9,6 +9,9 @@ import com.bookero.inventory.InventoryRepository;
 import com.bookero.route.RouteEntity;
 import com.bookero.route.RouteRepository;
 import com.bookero.airport.AirportRepository;
+import com.bookero.algorithms.AlgorithmRunRepository;
+import com.bookero.booking.BookingRepository;
+import com.bookero.pricing.PriceHistoryRepository;
 import com.bookero.common.ApiException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,18 +51,47 @@ public class SeedService {
   private final FlightRepository flightRepository;
   private final FareClassRepository fareClassRepository;
   private final InventoryRepository inventoryRepository;
+  private final BookingRepository bookingRepository;
+  private final PriceHistoryRepository priceHistoryRepository;
+  private final DemandSnapshotRepository demandSnapshotRepository;
+  private final AlgorithmRunRepository algorithmRunRepository;
 
   public SeedService(
       AirportRepository airportRepository,
       RouteRepository routeRepository,
       FlightRepository flightRepository,
       FareClassRepository fareClassRepository,
-      InventoryRepository inventoryRepository) {
+      InventoryRepository inventoryRepository,
+      BookingRepository bookingRepository,
+      PriceHistoryRepository priceHistoryRepository,
+      DemandSnapshotRepository demandSnapshotRepository,
+      AlgorithmRunRepository algorithmRunRepository) {
     this.airportRepository = airportRepository;
     this.routeRepository = routeRepository;
     this.flightRepository = flightRepository;
     this.fareClassRepository = fareClassRepository;
     this.inventoryRepository = inventoryRepository;
+    this.bookingRepository = bookingRepository;
+    this.priceHistoryRepository = priceHistoryRepository;
+    this.demandSnapshotRepository = demandSnapshotRepository;
+    this.algorithmRunRepository = algorithmRunRepository;
+  }
+
+  /**
+   * Clears the simulated world - bookings, fares, inventory, flights and the pricing
+   * audit trail - and lays down a fresh network. Reference data from the ETL and the
+   * user accounts are left alone. Used to put the demo back to a known state.
+   */
+  @Transactional
+  public SeedResponseDto reset() {
+    bookingRepository.deleteAllInBatch();
+    priceHistoryRepository.deleteAllInBatch();
+    demandSnapshotRepository.deleteAllInBatch();
+    algorithmRunRepository.deleteAllInBatch();
+    inventoryRepository.deleteAllInBatch();
+    fareClassRepository.deleteAllInBatch();
+    flightRepository.deleteAllInBatch();
+    return seed();
   }
 
   @Transactional

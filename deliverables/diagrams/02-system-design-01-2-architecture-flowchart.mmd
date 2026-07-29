@@ -1,0 +1,59 @@
+flowchart TB
+  subgraph Web["web (Next.js 16)"]
+    TUI["Traveler UI<br/>(search/book/history)"]
+    OUI["Ops UI<br/>(inventory/simulate)"]
+    LUI["Algorithm Lab"]
+    DASH["Revenue Dashboard"]
+  end
+
+  subgraph API["api (Spring Boot 4.1, Java 21)"]
+    AUTH["Auth Service<br/>(JWT HS256)"]
+    FLIGHT["Flight Service<br/>(search/detail)"]
+    INV["Inventory Service<br/>(seats, oversell check)"]
+    BOOK["Booking Service<br/>(transactional)"]
+    SIM["Demand Simulator"]
+    PRICE["Pricing Orchestrator"]
+    ALG["Algorithm Registry<br/>(9 keys)"]
+    PROXY["Analytics Proxy<br/>(CORS bridge)"]
+  end
+
+  subgraph PY["analytics (FastAPI, Python 3.13)"]
+    ETL["ETL Service<br/>(OpenFlights)"]
+    EDA["EDA Service<br/>(summaries)"]
+    ML["Demand ML<br/>(forecast)"]
+    METRICS["Revenue Metrics<br/>(KPIs)"]
+  end
+
+  subgraph DB["PostgreSQL 16"]
+    TABLES["airport | route | app_user | flight<br/>fare_class | inventory | booking<br/>algorithm_run | price_history | demand_snapshot"]
+  end
+
+  TUI -->|login| AUTH
+  TUI -->|/flights/search| FLIGHT
+  TUI -->|/bookings| BOOK
+
+  OUI -->|/simulate| SIM
+  OUI -->|/pricing/reprice| PRICE
+  OUI -->|/inventory| INV
+
+  LUI -->|/algorithms| ALG
+  LUI -->|"/algorithms/:key/run"| ALG
+
+  DASH -->|/api/ops/metrics| PROXY
+
+  AUTH -->|validate/create| DB
+  FLIGHT -->|query| DB
+  INV -->|query/lock| DB
+  BOOK -->|transactional write| DB
+  SIM -->|insert demand_snapshot| DB
+  PRICE -->|run Algorithm| ALG
+  ALG -->|query forecast| ML
+  ALG -->|write algorithm_run| DB
+
+  SIM -->|trigger| PRICE
+
+  ETL -->|upsert airports/routes| DB
+  ML -->|read bookings/demand_snapshot| DB
+  METRICS -->|query revenue by flight| DB
+
+  PROXY -->|GET /metrics/revenue| METRICS

@@ -2,9 +2,10 @@
 
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { SplitFlap } from "@/components/SplitFlap";
-import { api } from "@/lib/api";
+import { TravelerShell } from "@/components/TravelerShell";
+import { api, RouteOption } from "@/lib/api";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
 
 interface Flight {
@@ -26,6 +27,19 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [routes, setRoutes] = useState<RouteOption[]>([]);
+
+  useEffect(() => {
+    api.getRoutes().then(setRoutes).catch(() => setRoutes([]));
+  }, []);
+
+  // Route chips prefill the whole query, so a first-time visitor never has to guess
+  // which airport pairs the carrier actually flies.
+  const applyRoute = (route: RouteOption) => {
+    setOrigin(route.origin);
+    setDest(route.dest);
+    setDate(route.nextDepartAt.slice(0, 10));
+  };
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +59,13 @@ export default function SearchPage() {
 
   return (
     <ProtectedRoute requiredRole="TRAVELER">
+      <TravelerShell>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>FLIGHT SEARCH</h1>
-          <p className={styles.subtitle}>Book your next journey</p>
+          <h1 className={styles.title}>Flight search</h1>
+          <p className={styles.subtitle}>
+            Fares move with demand, days to departure and how full the cabin already is.
+          </p>
         </div>
 
         <form onSubmit={handleSearch} className={styles.searchForm}>
@@ -91,14 +108,50 @@ export default function SearchPage() {
           </button>
         </form>
 
+        {routes.length > 0 && (
+          <section className={styles.routeStrip} aria-label="Routes we fly">
+            <h2 className={styles.stripTitle}>Routes we fly</h2>
+            <div className={styles.chips}>
+              {routes.slice(0, 8).map((route) => (
+                <button
+                  key={`${route.origin}-${route.dest}`}
+                  type="button"
+                  className={styles.routeChip}
+                  onClick={() => applyRoute(route)}
+                >
+                  <span className={styles.chipPair}>
+                    {route.origin} <span aria-hidden="true">to</span> {route.dest}
+                  </span>
+                  <span className={styles.chipMeta}>
+                    {route.departures} departures
+                    {route.lowestFare !== null && ` · from $${Math.round(route.lowestFare)}`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {error && <div className={styles.error}>{error}</div>}
 
         <div className={styles.results}>
+          {!hasSearched && !isLoading && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon} aria-hidden="true">✈</div>
+              <p>Pick a route above, or type an airport pair and a date.</p>
+              <p className={styles.emptyHint}>
+                Every fare you see is the live price after the latest repricing run.
+              </p>
+            </div>
+          )}
+
           {hasSearched && flights.length === 0 && !isLoading && (
             <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>✈</div>
-              <p>No flights found for your search.</p>
-              <p className={styles.emptyHint}>Try different dates or routes.</p>
+              <div className={styles.emptyIcon} aria-hidden="true">✈</div>
+              <p>No departures on that route and date.</p>
+              <p className={styles.emptyHint}>
+                Try one of the routes above; each chip fills in the next available date.
+              </p>
             </div>
           )}
 
@@ -156,6 +209,7 @@ export default function SearchPage() {
           ))}
         </div>
       </div>
+      </TravelerShell>
     </ProtectedRoute>
   );
 }

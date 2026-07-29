@@ -17,6 +17,9 @@ venv/
 .env.local
 data/raw/*.dat
 data/processed/*
+# measured results are cited by docs/05-evaluation.md and the technical report
+!data/processed/benchmark.json
+!data/processed/experiment-*.json
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 pgdata/

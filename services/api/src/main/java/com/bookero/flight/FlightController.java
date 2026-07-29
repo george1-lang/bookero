@@ -37,6 +37,15 @@ public class FlightController {
     }
 
     /**
+     * GET /api/flights/routes
+     * The routes the carrier flies, used to populate the search suggestions.
+     */
+    @GetMapping("/routes")
+    public ResponseEntity<List<RouteOptionDto>> routes() {
+        return ResponseEntity.ok(flightSearchService.bookableRoutes());
+    }
+
+    /**
      * GET /api/flights/{id}
      * Returns 404 when flight not found.
      */

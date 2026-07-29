@@ -42,6 +42,11 @@ public class RouteGraphAlgorithm implements Algorithm {
 
   @Override
   public AlgorithmResult execute(AlgorithmContext ctx) {
+    String carrierHub = ctx.getFlights().values().stream()
+        .map(f -> f.getRoute().getOrigin().getCode())
+        .findFirst()
+        .orElse("n/a");
+
     var routes = routeRepository.findAll();
 
     // Build adjacency list (undirected)
@@ -79,7 +84,7 @@ public class RouteGraphAlgorithm implements Algorithm {
 
     int components = uf.countComponents();
 
-    // Find hub (highest degree)
+    // Busiest airport in the reference network, which is not the carrier's own hub.
     String hub = null;
     int maxDegree = 0;
     for (var entry : adjacency.entrySet()) {
@@ -96,8 +101,9 @@ public class RouteGraphAlgorithm implements Algorithm {
         Map.entry("edges", (Object) edges),
         Map.entry("components", (Object) components),
         Map.entry("avgDegree", (Object) String.format("%.2f", avgDegree)),
-        Map.entry("hub", (Object) hub),
-        Map.entry("hubDegree", (Object) maxDegree)
+        Map.entry("busiestAirport", (Object) hub),
+        Map.entry("busiestAirportDegree", (Object) maxDegree),
+        Map.entry("carrierHub", (Object) carrierHub)
     );
 
     return AlgorithmResult.success(0L, java.math.BigDecimal.ZERO, List.of(), 0, metrics);

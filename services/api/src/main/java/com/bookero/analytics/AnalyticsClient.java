@@ -7,10 +7,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Thin client for the Python analytics service. Every call degrades to an empty
@@ -21,14 +23,19 @@ import java.util.UUID;
 public class AnalyticsClient {
 
   private static final Logger log = LoggerFactory.getLogger(AnalyticsClient.class);
-  private static final Duration TIMEOUT = Duration.ofSeconds(8);
+  // Short enough that a stalled analytics service cannot tie up API threads.
+  private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(2);
+  private static final Duration READ_TIMEOUT = Duration.ofSeconds(4);
+  /** The forecast changes only when the model is retrained, so a brief cache is safe. */
+  private static final Duration FORECAST_TTL = Duration.ofSeconds(20);
 
   private final RestClient client;
+  private final AtomicReference<CachedForecast> forecastCache = new AtomicReference<>();
 
   public AnalyticsClient(BookeroProperties properties, RestClient.Builder builder) {
     var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-    factory.setConnectTimeout((int) TIMEOUT.toMillis());
-    factory.setReadTimeout((int) TIMEOUT.toMillis());
+    factory.setConnectTimeout((int) CONNECT_TIMEOUT.toMillis());
+    factory.setReadTimeout((int) READ_TIMEOUT.toMillis());
     this.client = builder
         .baseUrl(properties.analyticsBaseUrl())
         .requestFactory(factory)
@@ -37,6 +44,16 @@ public class AnalyticsClient {
 
   /** Latest per-flight demand scores in [0,1]. Empty when analytics is down. */
   public Optional<Map<UUID, Double>> demandForecast() {
+    CachedForecast cached = forecastCache.get();
+    if (cached != null && cached.isFresh()) {
+      return cached.value();
+    }
+    Optional<Map<UUID, Double>> fresh = fetchForecast();
+    forecastCache.set(new CachedForecast(fresh, Instant.now()));
+    return fresh;
+  }
+
+  private Optional<Map<UUID, Double>> fetchForecast() {
     return get("/demand/forecast", ForecastResponse.class)
         .map(r -> r.forecasts().stream()
             .filter(f -> f.flightId() != null && f.demandScore() != null)
@@ -73,5 +90,11 @@ public class AnalyticsClient {
   }
 
   private record Forecast(String flightId, Double demandScore) {
+  }
+
+  private record CachedForecast(Optional<Map<UUID, Double>> value, Instant fetchedAt) {
+    boolean isFresh() {
+      return Instant.now().isBefore(fetchedAt.plus(FORECAST_TTL));
+    }
   }
 }

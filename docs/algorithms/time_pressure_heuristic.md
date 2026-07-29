@@ -113,10 +113,23 @@ Closed-form heuristic is interpretable and fast (no iteration). Time pressure (1
 
 ## Performance Results
 
-| Flights | Days to depart | Load | Duration (ms) | Updated | Max multiplier |
-|---------|----------------|------|-------------|---------|---------|
-| 50 | 7 | 70% | 2 | 50 | 1.64 |
-| 100 | 1 | 85% | 3 | 100 | 1.78 |
-| 200 | 14 | 50% | 5 | 200 | 1.23 |
+| Metric | Benchmark (ms) | Low Load (w3-w7) | High Load (w7-w9) |
+|--------|---:|---:|---:|
+| Duration | 3 (median) | 6 | 4 |
+| Duration range | 3-4 ms | N/A | N/A |
+| Fares moved | 240 | 240 | 240 |
+| Revenue (absolute) | N/A | 2,024,462.39 | 2,503,430.70 |
+| Revenue delta | N/A | -21.69% | -26.25% |
+| Load factor | 45.4% | 47.9% | 61.7% |
+| Avg fare | 448.26 | 467.65 | 448.80 |
+| Seats sold | 4,110 | 4,329 | 5,578 |
+| Avg multiplier | 1.283 | N/A | N/A |
 
-**Note:** Post-booking reprice uses this algorithm by default (configured via `bookero.reprice-after-booking-key=time_pressure_heuristic`).
+**Critical Finding:**
+- Algorithm loses severely in both regimes (-21.69% at low load, -26.25% at high load).
+- Raises fares without any demand signal (uses only days-to-departure and load factor).
+- In low-load regimes, customers refuse higher prices; bookings collapse (47.9% load vs baseline 65.1%).
+- Demonstrates that a plausible-sounding heuristic can be actively harmful if it ignores demand.
+- Conclusion: Time-pressure-only logic is insufficient; must incorporate demand forecasts.
+
+**Note:** Post-booking light-reprice uses this algorithm by default (feature flag in Spring) to capture late-minute demand spikes. At the full-repricing level shown here, it performs poorly without demand context.

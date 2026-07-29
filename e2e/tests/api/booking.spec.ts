@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { API, ANALYST, TRAVELER, login, auth, ensureSeeded, bookableFlight } from "./helpers";
+import { API, ANALYST, TRAVELER, login, auth, ensureSeeded, bookableFlight, tightestFlight } from "./helpers";
 
 test.describe("search, booking and oversell protection", () => {
   test("seeded network is searchable by origin, destination and date", async ({ request }) => {
@@ -80,14 +80,14 @@ test.describe("search, booking and oversell protection", () => {
   test("concurrent bookings never oversell the last seats", async ({ request }) => {
     const analyst = await login(request, ANALYST);
     await ensureSeeded(request, analyst);
-    const flight = await bookableFlight(request, analyst);
+    const flight = await tightestFlight(request, analyst);
     const traveler = await login(request, TRAVELER);
 
     const detail = await request.get(`${API}/api/flights/${flight.flightId}`, { headers: auth(traveler) });
     const fareClassId = (await detail.json()).fareClasses[0].id;
 
     const seatsLeft: number = flight.seatsLeft;
-    const attempts = seatsLeft + 8; // deliberately overshoot capacity
+    const attempts = seatsLeft + 8; // deliberately overshoot the remaining capacity
 
     const results = await Promise.all(
       Array.from({ length: attempts }, () =>

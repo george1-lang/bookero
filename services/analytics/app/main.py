@@ -5,6 +5,7 @@ from fastapi import FastAPI, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.db import get_db, healthcheck
 from app.etl import run_etl
 from app.eda import get_eda_summary
@@ -15,7 +16,7 @@ app = FastAPI(title="Bookero Analytics", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3100"],
+    allow_origins=settings.cors_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

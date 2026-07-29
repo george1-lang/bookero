@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-07-29T03:02:33.057Z",
+  "waveOneIntensity": 3,
+  "waveTwoIntensity": 7,
+  "arms": [
+    {
+      "strategy": "baseline",
+      "durationMs": 2,
+      "faresMoved": 0,
+      "totalRevenue": 2585148.6,
+      "baselineRevenue": 2585148.6,
+      "loadFactor": 0.6509673852957435,
+      "avgFare": 439.0537703804348,
+      "seatsSold": 5888,
+      "bookingCount": 5888,
+      "liftVsControl": 0
+    },
+    {
+      "strategy": "greedy_protection",
+      "durationMs": 4,
+      "faresMoved": 0,
+      "totalRevenue": 2585148.6,
+      "baselineRevenue": 2585148.6,
+      "loadFactor": 0.6509673852957435,
+      "avgFare": 439.0537703804348,
+      "seatsSold": 5888,
+      "bookingCount": 5888,
+      "liftVsControl": 0
+    },
+    {
+      "strategy": "dp_seat_protect",
+      "durationMs": 7,
+      "faresMoved": 240,
+      "totalRevenue": 2758827.41,
+      "baselineRevenue": 2930682.21,
+      "loadFactor": 0.7393034825870647,
+      "avgFare": 412.56578585314793,
+      "seatsSold": 6687,
+      "bookingCount": 6687,
+      "liftVsControl": 0.06718329847653634
+    },
+    {
+      "strategy": "time_pressure_heuristic",
+      "durationMs": 6,
+      "faresMoved": 240,
+      "totalRevenue": 2024462.39,
+      "baselineRevenue": 1860773.2,
+      "loadFactor": 0.4786069651741294,
+      "avgFare": 467.6512797412797,
+      "seatsSold": 4329,
+      "bookingCount": 4329,
+      "liftVsControl": -0.2168874199340031
+    },
+    {
+      "strategy": "revenue_optimize",
+      "durationMs": 294,
+      "faresMoved": 240,
+      "totalRevenue": 3083989.58,
+      "baselineRevenue": 3725213.88,
+      "loadFactor": 0.9513543394140409,
+      "avgFare": 358.3950703079605,
+      "seatsSold": 8605,
+      "bookingCount": 8605,
+      "liftVsControl": 0.19296414140370885
+    },
+    {
+      "strategy": "demand_ml",
+      "durationMs": 3,
+      "faresMoved": 240,
+      "totalRevenue": 2827388.14,
+      "baselineRevenue": 3116201.6,
+      "loadFactor": 0.811608623548922,
+      "avgFare": 385.1502710802343,
+      "seatsSold": 7341,
+      "bookingCount": 7341,
+      "liftVsControl": 0.09370430001586758
+    }
+  ]
+}

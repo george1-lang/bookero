@@ -34,6 +34,24 @@ public class FlightSearchService {
         this.inventoryRepository = inventoryRepository;
     }
 
+    /** Routes the carrier actually flies, so travellers are not left guessing codes. */
+    public List<RouteOptionDto> bookableRoutes() {
+        Instant from = Instant.now();
+        Map<String, BigDecimal> lowestByRoute = new HashMap<>();
+        for (FareClassEntity fc : fareClassRepository.findAllUpcoming(from)) {
+            String key = fc.getFlight().getRoute().getOrigin().getCode()
+                + ">" + fc.getFlight().getRoute().getDestination().getCode();
+            lowestByRoute.merge(key, fc.getCurrentPrice(), (a, b) -> a.min(b));
+        }
+
+        return flightRepository.findBookableRoutes(from).stream()
+            .map(row -> new RouteOptionDto(
+                (String) row[0], (String) row[1], (String) row[2], (String) row[3],
+                (Integer) row[4], (Long) row[5], (Instant) row[6],
+                lowestByRoute.get(row[0] + ">" + row[2])))
+            .toList();
+    }
+
     /**
      * Search flights by origin, destination, and departure date (UTC day).
      * Returns empty list for unknown airport codes.
@@ -44,7 +62,8 @@ public class FlightSearchService {
         Instant dayStart = localDate.atStartOfDay(ZoneId.of("UTC")).toInstant();
         Instant dayEnd = localDate.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-        List<FlightEntity> flights = flightRepository.findByOriginDestAndDepartDate(originCode, destCode, dayStart);
+        List<FlightEntity> flights =
+            flightRepository.findByOriginDestAndDepartDate(originCode, destCode, dayStart, dayEnd);
 
         if (flights.isEmpty()) {
             return List.of();
@@ -101,6 +120,7 @@ public class FlightSearchService {
         );
 
         List<FareClassDto> fareDtos = fareClasses.stream()
+            .sorted(java.util.Comparator.comparing(FareClassEntity::getBasePrice))
             .map(f -> new FareClassDto(
                 f.getId(),
                 f.getCode(),

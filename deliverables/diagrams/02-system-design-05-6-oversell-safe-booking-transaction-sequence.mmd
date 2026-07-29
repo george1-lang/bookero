@@ -1,0 +1,45 @@
+sequenceDiagram
+  participant T1 as Thread 1<br/>(Traveler)
+  participant T2 as Thread 2<br/>(Traveler)
+  participant S as Spring API
+  participant DB as PostgreSQL
+
+  par Concurrent paths
+    T1->>S: POST /api/bookings {flightId, fareClassId}
+    T2->>S: POST /api/bookings {flightId, fareClassId}
+  end
+
+  Note over S,DB: Thread 1 transaction
+
+  S->>S: BookingService.book(...)
+  S->>DB: BEGIN TRANSACTION
+
+  S->>DB: SELECT * FROM inventory<br/>WHERE flight_id = ? FOR UPDATE NOWAIT
+  Note over DB: Pessimistic lock acquired on inventory row
+
+  DB-->>S: Inventory {seats_left: 1}
+  S->>S: if (seats_left < 1) throw OversellException
+  alt Seat available
+    S->>DB: UPDATE inventory SET seats_left = seats_left - 1<br/>WHERE flight_id = ?
+    S->>DB: INSERT INTO booking (user_id, flight_id, fare_class_id, paid_price)
+    S->>DB: COMMIT
+    S-->>T1: HTTP 201 {bookingId, paidPrice}
+  else Seat unavailable (concurrent T2 won lock first)
+    S->>DB: ROLLBACK
+    S-->>T1: HTTP 409 Conflict
+  end
+
+  Note over S,DB: Thread 2 transaction (interleaved)
+
+  S->>DB: BEGIN TRANSACTION
+  S->>DB: SELECT * FROM inventory FOR UPDATE NOWAIT
+  Note over DB: Lock wait or immediate fail<br/>depending on T1 timing
+
+  alt Lock acquired (T1 released)
+    DB-->>S: Inventory {seats_left: 0}
+    S->>S: if (seats_left < 1) throw OversellException
+    S->>DB: ROLLBACK
+    S-->>T2: HTTP 409 Conflict
+  else Lock not acquired
+    S-->>T2: HTTP 409 Conflict (immediate)
+  end

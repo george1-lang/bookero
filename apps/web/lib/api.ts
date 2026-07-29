@@ -79,6 +79,17 @@ export interface AlgorithmRunResponse {
   metrics?: Record<string, unknown>;
 }
 
+export interface RouteOption {
+  origin: string;
+  originCity: string;
+  dest: string;
+  destCity: string;
+  distanceKm: number;
+  departures: number;
+  nextDepartAt: string;
+  lowestFare: number | null;
+}
+
 export interface SeedResponse {
   flights: number;
   fareClasses: number;
@@ -193,6 +204,10 @@ export const api = {
       date,
     });
     return apiFetch(`/api/flights/search?${params}`);
+  },
+
+  async getRoutes(): Promise<RouteOption[]> {
+    return apiFetch("/api/flights/routes");
   },
 
   async getFlightDetail(id: string): Promise<FlightDetailResponse> {

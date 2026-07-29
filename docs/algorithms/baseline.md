@@ -115,13 +115,19 @@ public class BaselineAlgorithm implements Algorithm {
 
 ## Performance Results
 
-| Run | Flights | Duration (ms) | Revenue delta | Load factor |
-|-----|---------|-------------|-----------|----------|
-| Smoke test (10 flights) | 10 | 1 | $0.00 | 60% |
-| Moderate load (100 flights) | 100 | 3 | $0.00 | 65% |
-| High load (500 flights) | 500 | 8 | $0.00 | 70% |
+| Metric | Benchmark (ms) | Low Load (w3-w7) | High Load (w7-w9) |
+|--------|---:|---:|---:|
+| Duration | 2 (median) | N/A | N/A |
+| Duration range | 2-3 ms | N/A | N/A |
+| Fares moved | 0 | 0 | 0 |
+| Revenue (absolute) | N/A | 2,585,148.60 | 3,394,661.04 |
+| Revenue delta | 0.00% | control | control |
+| Load factor | 45.4% | 65.1% | 85.2% |
+| Avg fare | 448.26 | 439.05 | 440.64 |
+| Seats sold | 4,110 | 5,888 | 7,704 |
 
-**Notes:**  
-- Duration is near-zero (no optimization, just resets).
-- Revenue delta always 0 by design (control group).
-- Baseline latency is negligible; suitable for synchronous execution.
+**Notes:**
+- Baseline is the control group: all fares reset to base price.
+- Latency is near-zero (O(F·C) scan through fare classes; no optimization).
+- Revenue delta is 0 by design (control treatment).
+- Baseline revenue in experiments reflects actual bookings at list prices; used to compute lift for other algorithms.

@@ -18,7 +18,7 @@ export default function DashboardPage() {
         const data = await api.getMetrics();
         setMetrics(data);
         if (data.available === false) {
-          setError("Analytics offline — figures below are not live.");
+          setError("Analytics offline - figures below are not live.");
         }
       } catch {
         setError("Analytics service unavailable. Showing last known data.");
@@ -45,7 +45,7 @@ export default function DashboardPage() {
       <ProtectedRoute requiredRole="ANALYST">
         <div className={styles.container}>
           <div className={styles.offlineBanner}>
-            <span>ANALYTICS OFFLINE</span> — showing last known data
+            <span>ANALYTICS OFFLINE</span> - showing last known data
           </div>
 
           <div className={styles.header}>

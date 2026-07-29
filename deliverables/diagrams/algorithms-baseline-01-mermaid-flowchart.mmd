@@ -1,0 +1,12 @@
+flowchart TD
+  Start([Baseline Run]) --> Load["Load all flights in scope"]
+  Load --> FareLoop["For each flight"]
+  FareLoop --> GetFares["Get all fare classes"]
+  GetFares --> Check{"Current ≠ Base?"}
+  Check -->|Yes| CreateUpdate["Create price update"]
+  CreateUpdate --> AddUpdate["Add to updates list"]
+  AddUpdate --> Next["Next fare class"]
+  Next --> FareLoop
+  Check -->|No| Next
+  Next --> Return["Return SUCCESS with updates"]
+  Return --> End([Done])

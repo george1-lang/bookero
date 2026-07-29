@@ -2,21 +2,35 @@ package com.bookero.algorithms;
 
 import com.bookero.flight.FareClassEntity;
 import com.bookero.inventory.InventoryEntity;
-import com.bookero.simulation.DemandSnapshotRepository;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Constrained revenue maximisation per flight.
+ *
+ * <p>Willingness to pay is modelled with constant price elasticity: raising the fare
+ * by a factor {@code m} scales expected demand by {@code m^-E}. Expected revenue is
+ *
+ * <pre>
+ *   R(m) = m * min(seatsLeft, demandAtBase * m^-E)
+ * </pre>
+ *
+ * measured in units of the base fare. It rises linearly while the cabin still sells
+ * out and falls as {@code m^(1-E)} once it does not, giving an interior maximum
+ * whenever {@code E > 1}. Golden-section search finds it in roughly twenty
+ * evaluations rather than the dense grid a linear scan would need.
+ */
 @Component
 public class RevenueOptimizeAlgorithm implements Algorithm {
 
-  private final DemandSnapshotRepository demandSnapshotRepository;
-
-  public RevenueOptimizeAlgorithm(DemandSnapshotRepository demandSnapshotRepository) {
-    this.demandSnapshotRepository = demandSnapshotRepository;
-  }
+  /** Leisure air travel is generally estimated as price-elastic. */
+  private static final double ELASTICITY = 1.6;
+  private static final double INV_PHI = 0.618_033_988_75;
+  private static final double TOLERANCE = 1e-4;
 
   @Override
   public String key() {
@@ -25,7 +39,7 @@ public class RevenueOptimizeAlgorithm implements Algorithm {
 
   @Override
   public String displayName() {
-    return "Revenue Optimize (Demand-Based)";
+    return "Revenue Optimisation (Golden Section)";
   }
 
   @Override
@@ -35,77 +49,85 @@ public class RevenueOptimizeAlgorithm implements Algorithm {
 
   @Override
   public String description() {
-    return "Maximize expected revenue using demand forecast with golden-section or grid search over price multiplier.";
+    return "Maximises expected revenue under capacity against a constant-elasticity demand "
+        + "curve driven by the ML forecast, searching the fare band by golden section.";
   }
 
   @Override
   public AlgorithmResult execute(AlgorithmContext ctx) {
+    List<PriceUpdate> updates = new ArrayList<>();
     var fareClasses = ctx.getFareClasses();
     var inventory = ctx.getInventory();
-    var forecast = ctx.getDemandForecast();
-    var priceUpdates = new ArrayList<PriceUpdate>();
+    boolean forecastAvailable = ctx.getDemandForecast().isPresent();
 
-    boolean analyticsAvailable = forecast.isPresent();
-    String modelSource = analyticsAvailable ? "trained" : "heuristic";
+    int evaluations = 0;
+    int flightsOptimised = 0;
+    double multiplierSum = 0;
 
     for (var flightId : ctx.flightIds()) {
-      var fares = fareClasses.get(flightId);
-      var inv = inventory.get(flightId);
-      if (fares == null || inv == null) continue;
-
-      // Get demand score
-      double demandScore = forecast
-          .flatMap(f -> Optional.ofNullable(f.get(flightId)))
-          .orElse(0.5);
-
-      // Price multiplier search: find revenue-maximizing multiplier
-      double bestMultiplier = 1.0;
-      double bestRevenue = 0;
-
-      for (double multiplier = 0.8; multiplier <= 1.5; multiplier += 0.1) {
-        double expectedDemand = inv.getSeatsTotal() * demandScore;
-        double expectedSeatsToSell = Math.min(expectedDemand, inv.getSeatsTotal());
-
-        // Demand elasticity: higher price → lower demand
-        double elasticity = 0.8; // Simplified: 20% price increase → 20% demand decrease
-        expectedSeatsToSell *= Math.pow(multiplier, -elasticity);
-
-        // Revenue = price * seats sold
-        double revenue = inv.getSeatsTotal() * multiplier * expectedSeatsToSell / inv.getSeatsTotal();
-        if (revenue > bestRevenue) {
-          bestRevenue = revenue;
-          bestMultiplier = multiplier;
-        }
+      List<FareClassEntity> fares = fareClasses.getOrDefault(flightId, List.of());
+      InventoryEntity inv = inventory.get(flightId);
+      if (fares.isEmpty() || inv == null || inv.getSeatsLeft() == null) {
+        continue;
       }
 
-      // Apply best multiplier to all fares
-      for (var fare : fares) {
-        BigDecimal newPrice = fare.getBasePrice()
-            .multiply(BigDecimal.valueOf(bestMultiplier))
-            .setScale(2, RoundingMode.HALF_UP);
+      double capacity = Math.max(1, inv.getSeatsLeft());
+      double demandAtBase = ctx.demandFor(flightId) * inv.getSeatsTotal();
 
-        if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
-          newPrice = BigDecimal.ONE;
+      double lo = Fares.MIN_MULTIPLIER;
+      double hi = Fares.MAX_MULTIPLIER;
+      double x1 = hi - INV_PHI * (hi - lo);
+      double x2 = lo + INV_PHI * (hi - lo);
+      double f1 = expectedRevenue(x1, demandAtBase, capacity);
+      double f2 = expectedRevenue(x2, demandAtBase, capacity);
+      evaluations += 2;
+
+      while (hi - lo > TOLERANCE) {
+        if (f1 > f2) {
+          hi = x2;
+          x2 = x1;
+          f2 = f1;
+          x1 = hi - INV_PHI * (hi - lo);
+          f1 = expectedRevenue(x1, demandAtBase, capacity);
+        } else {
+          lo = x1;
+          x1 = x2;
+          f1 = f2;
+          x2 = lo + INV_PHI * (hi - lo);
+          f2 = expectedRevenue(x2, demandAtBase, capacity);
         }
+        evaluations++;
+      }
 
-        if (!fare.getCurrentPrice().equals(newPrice)) {
-          priceUpdates.add(new PriceUpdate(
-              flightId,
-              fare.getFlight().getFlightNo(),
-              fare.getCode(),
-              fare.getCurrentPrice(),
-              newPrice
-          ));
+      double optimal = (lo + hi) / 2.0;
+      multiplierSum += optimal;
+      flightsOptimised++;
+
+      for (FareClassEntity fare : fares) {
+        BigDecimal target = Fares.repriceFromBase(fare, optimal);
+        if (Fares.moved(fare, target)) {
+          updates.add(Fares.update(fare, target));
         }
       }
     }
 
-    Map<String, Object> metrics = Map.ofEntries(
-        Map.entry("faresOptimized", (Object) priceUpdates.size()),
-        Map.entry("modelSource", (Object) modelSource),
-        Map.entry("searchMethod", (Object) "grid_search")
-    );
+    return AlgorithmResult.success(
+            0L,
+            BigDecimal.ZERO,
+            updates,
+            flightsOptimised,
+            Map.of(
+                "elasticity", ELASTICITY,
+                "objectiveEvaluations", evaluations,
+                "avgOptimalMultiplier", flightsOptimised == 0 ? 0.0 : multiplierSum / flightsOptimised,
+                "demandSource", forecastAvailable ? "ml_forecast" : "demand_snapshot"))
+        .withMessage(forecastAvailable
+            ? null
+            : "Analytics forecast unavailable; optimised against the latest demand snapshots.");
+  }
 
-    return AlgorithmResult.success(0L, BigDecimal.ZERO, priceUpdates, ctx.flightIds().size(), metrics);
+  private double expectedRevenue(double multiplier, double demandAtBase, double capacity) {
+    double demand = demandAtBase * Math.pow(multiplier, -ELASTICITY);
+    return multiplier * Math.min(capacity, demand);
   }
 }

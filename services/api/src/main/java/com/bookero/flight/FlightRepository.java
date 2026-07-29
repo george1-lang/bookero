@@ -14,10 +14,22 @@ public interface FlightRepository extends JpaRepository<FlightEntity, UUID> {
         JOIN FETCH r.destination
         WHERE r.origin.code = :originCode
         AND r.destination.code = :destCode
-        AND CAST(f.departAt AS DATE) = CAST(:departDate AS DATE)
+        AND f.departAt >= :dayStart AND f.departAt < :dayEnd
         ORDER BY f.departAt ASC
         """)
-    List<FlightEntity> findByOriginDestAndDepartDate(String originCode, String destCode, Instant departDate);
+    List<FlightEntity> findByOriginDestAndDepartDate(String originCode, String destCode,
+                                                    Instant dayStart, Instant dayEnd);
+
+    /** Bookable routes on the seeded network, with the next departure on each. */
+    @Query("""
+        SELECT r.origin.code, r.origin.city, r.destination.code, r.destination.city,
+               r.distanceKm, COUNT(f), MIN(f.departAt)
+        FROM FlightEntity f JOIN f.route r
+        WHERE f.departAt >= :from
+        GROUP BY r.origin.code, r.origin.city, r.destination.code, r.destination.city, r.distanceKm
+        ORDER BY COUNT(f) DESC, MIN(f.departAt) ASC
+        """)
+    List<Object[]> findBookableRoutes(Instant from);
 
     List<FlightEntity> findAllByDepartAtAfter(Instant departAt);
 

@@ -39,3 +39,6 @@ services/analytics/data/
 
 # docx build scratch
 deliverables/.report-build/
+
+# original course brief keeps an emoji in its filename; the copy in deliverables/ is tracked
+ATTENTION*.txt

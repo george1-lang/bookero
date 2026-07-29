@@ -97,8 +97,18 @@ Earliest Departure Time greedy is optimal for interval scheduling (no other job 
 
 ## Performance Results
 
-| Flights | Slots | Duration (ms) | Used | Conflicts |
-|---------|-------|-------------|------|-----------|
-| 50 | 10 | 1 | 8 | 2 |
-| 100 | 10 | 2 | 10 | 10 |
-| 200 | 15 | 3 | 15 | 5 |
+| Metric | Benchmark (ms) | Notes |
+|--------|---:|---|
+| Duration (median) | 0 | Fastest algorithm; O(F·S) greedy interval scheduling |
+| Duration range | 0-0 ms | Negligible (<1 ms sub-second precision) |
+| Flights scheduled | 60 | Total flights assigned to slots |
+| Stands (slots) used | 3 | Abstract gate count for assignment |
+| Clashes avoided | 2 | Slot reassignments due to turnaround conflicts |
+| Mean stand utilisation | 9.20% | (60 flights scheduled / 3 stands / 326-hour horizon) |
+| Prep time (min) | 45 | Time to prepare aircraft between flights |
+| Turnaround time (min) | 45 | Minimum time between arrival and next departure |
+| Horizon (hours) | 326 | Scheduling window (approx 2 weeks) |
+| Fares moved | 0 | This is an analysis algorithm; does not reprice |
+| Revenue delta | N/A | Not applicable (scheduling algorithm, not pricing) |
+
+**Note:** `slot_schedule` optimizes gate assignments to minimize conflicts and improve airport capacity planning. It does not directly affect pricing or revenue. Low utilisation (9.20%) is expected: with only 3 abstract stands and 326-hour horizon, real airports have much higher utilisation with concrete gates and less slack. This algorithm demonstrates scheduling pattern recognition; production use would optimize stand assignment across a realistic gate network.

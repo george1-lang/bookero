@@ -39,31 +39,37 @@ public class ShortestPathAlgorithm implements Algorithm {
 
   @Override
   public AlgorithmResult execute(AlgorithmContext ctx) {
-    // Use a default hub (e.g., first available airport)
-    var airports = airportRepository.findAll();
-    if (airports.isEmpty()) {
+    // Anchored on the carrier's own hub, not an arbitrary row from the airport table.
+    var hub = ctx.getFlights().values().stream()
+        .map(f -> f.getRoute().getOrigin().getCode())
+        .findFirst()
+        .orElseGet(() -> routeRepository.findBusiestOrigin().orElse(null));
+
+    if (hub == null) {
       return AlgorithmResult.success(0L, java.math.BigDecimal.ZERO, List.of(), 0,
-          Map.of("visitedNodes", 0, "relaxedEdges", 0, "pathLength", 0));
+          Map.of("visitedNodes", 0, "relaxedEdges", 0, "reachableAirports", 0,
+              "note", "No routes loaded; run the analytics ETL first."));
     }
 
-    var hub = airports.get(0).getCode();
-
-    // Run Dijkstra from hub
     var routes = routeRepository.findAll();
     var graph = buildGraph(routes);
 
     var result = dijkstra(graph, hub);
 
-    int pathLength = (int) result.distances().values().stream()
+    var finite = result.distances().values().stream()
         .filter(d -> d < Integer.MAX_VALUE)
-        .count();
+        .toList();
+    int reachable = finite.size();
+    long farthest = finite.stream().mapToInt(Integer::intValue).max().orElse(0);
+    double meanKm = finite.stream().mapToInt(Integer::intValue).average().orElse(0.0);
 
     Map<String, Object> metrics = Map.ofEntries(
+        Map.entry("originHub", (Object) hub),
         Map.entry("visitedNodes", (Object) result.visitedCount()),
         Map.entry("relaxedEdges", (Object) result.relaxedCount()),
-        Map.entry("pathLength", (Object) pathLength),
-        Map.entry("originHub", (Object) hub),
-        Map.entry("reachableCount", (Object) pathLength)
+        Map.entry("reachableAirports", (Object) reachable),
+        Map.entry("farthestReachableKm", (Object) farthest),
+        Map.entry("meanShortestPathKm", (Object) Math.round(meanKm))
     );
 
     return AlgorithmResult.success(0L, java.math.BigDecimal.ZERO, List.of(), 0, metrics);

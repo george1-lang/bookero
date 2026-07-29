@@ -105,8 +105,24 @@ DP optimal allocation requires solving a nested optimization: choose class limit
 
 ## Performance Results
 
-| Flights | Classes | Capacity | Duration (ms) | States |
-|---------|---------|----------|-------------|--------|
-| 20 | 3 | 150 | 5 | 450 |
-| 50 | 4 | 200 | 8 | 1000 |
-| 100 | 5 | 250 | 12 | 1500 |
+| Metric | Benchmark (ms) | Low Load (w3-w7) | High Load (w7-w9) |
+|--------|---:|---:|---:|
+| Duration | 8 (median) | 7 | 13 |
+| Duration range | 7-9 ms | N/A | N/A |
+| Fares moved | 240 | 240 | 240 |
+| Revenue (absolute) | N/A | 2,758,827.41 | 3,631,528.99 |
+| Revenue delta | N/A | +6.72% | +6.98% |
+| Load factor | 45.4% | 73.9% | 94.1% |
+| Avg fare | 448.26 | 412.57 | 426.49 |
+| Seats sold | 4,110 | 6,687 | 8,515 |
+| DP table size | 91,050 | N/A | N/A |
+| States evaluated | 45,525 | N/A | N/A |
+| Flights solved | 60 | 60 | 60 |
+
+**Interpretation:**
+- Consistent performance across both load regimes: +6.72% (low load), +6.98% (high load).
+- EMSR-style allocation adapts seat protection levels based on demand intensity (high demand -> protect premium seats; low demand -> open all).
+- Load factors improve substantially: 65.1% baseline -> 73.9% (low) and 85.2% -> 94.1% (high).
+- Latency acceptable for repricing workflow (8 ms median; can run multiple times per hour).
+- DP table size (91k states) is manageable; scales reasonably with flight count and class count.
+- Most robust algorithm in evaluation: gains in both regimes, maintains reasonable fares, high load factors.

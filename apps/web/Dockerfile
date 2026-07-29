@@ -3,16 +3,18 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci
 
-# Copy source
 COPY . .
 
-# Build Next.js app
+# NEXT_PUBLIC_* values are inlined at build time, so the deployed API and analytics
+# origins have to be supplied here rather than at runtime.
+ARG NEXT_PUBLIC_API_URL=http://localhost:8080
+ARG NEXT_PUBLIC_ANALYTICS_URL=http://localhost:8001
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_ANALYTICS_URL=$NEXT_PUBLIC_ANALYTICS_URL
+
 RUN npm run build
 
 # Runtime stage
@@ -20,24 +22,21 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
-# Copy built app from builder
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-# Switch to non-root user
 USER nextjs
 
-# Expose port
 EXPOSE 3000
 
-# Set environment
+# Defaults only. The standalone server reads PORT and HOSTNAME at runtime, so a
+# platform-assigned port takes effect without a rebuild.
 ENV NODE_ENV=production \
-    PORT=3000
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
-# Start app
 CMD ["node", "server.js"]

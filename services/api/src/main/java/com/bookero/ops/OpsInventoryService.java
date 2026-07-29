@@ -80,6 +80,7 @@ public class OpsInventoryService {
                 inventory.getSeatsLeft(),
                 loadFactor,
                 fareClasses.stream()
+                    .sorted(java.util.Comparator.comparing(FareClassEntity::getBasePrice))
                     .map(f -> new InventoryFareClassDto(
                         f.getId(),
                         f.getCode(),

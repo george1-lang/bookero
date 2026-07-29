@@ -70,7 +70,6 @@ class DemandSimulatorTest {
         flightRepository.deleteAll();
         routeRepository.deleteAll();
         airportRepository.deleteAll();
-        userRepository.deleteAll();
 
         AirportEntity origin = new AirportEntity("ACC", "Accra", "Accra", "Ghana", 5.6, -0.2);
         AirportEntity dest = new AirportEntity("LAD", "Luanda", "Luanda", "Angola", -8.8, 13.2);
@@ -94,7 +93,7 @@ class DemandSimulatorTest {
 
         UserEntity traveler = new UserEntity(
             UUID.randomUUID(),
-            "traveler@bookero.local",
+            "simulation-fixture@bookero.local",
             "hashed",
             Role.TRAVELER
         );

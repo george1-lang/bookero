@@ -102,8 +102,17 @@ Dijkstra is the gold-standard shortest-path algorithm for non-negative weights (
 
 ## Performance Results
 
-| Nodes | Edges | Duration (ms) | Visited | Relaxed |
-|-------|-------|-------------|---------|---------|
-| 10 | 15 | 1 | 10 | 10 |
-| 50 | 120 | 2 | 50 | 50 |
-| 100 | 250 | 3 | 100 | 100 |
+| Metric | Benchmark (ms) | Notes |
+|--------|---:|---|
+| Duration (median) | 188 | Dijkstra's algorithm on full graph; O((N+E)logN) with binary heap |
+| Duration range | 181-246 ms | Variance due to graph connectivity and node distances |
+| Origin hub | ACC | Starting point for shortest-path computation |
+| Nodes visited | 3,231 | Airports reachable from ACC (breadth of reachability) |
+| Edges relaxed | 4,842 | Edge-relaxation operations in Dijkstra's main loop |
+| Reachable airports | 3,231 | Same as nodes visited (full reachability from hub) |
+| Mean shortest path (km) | 9,644 | Average distance to reachable destinations |
+| Farthest reachable (km) | 20,428 | Max distance airport reachable via shortest path from ACC |
+| Fares moved | 0 | This is an analysis algorithm; does not reprice |
+| Revenue delta | N/A | Not applicable (routing analysis, not pricing) |
+
+**Note:** `shortest_path` (Dijkstra) is an offline analysis tool. Latency (188 ms) is acceptable for periodic reachability analysis but not for real-time pricing. Algorithm enables network-aware features: e.g., inform travelers of fastest connection options or identify hub-dependent routes for capacity planning. In production, might cache results and update once daily or on schedule changes.

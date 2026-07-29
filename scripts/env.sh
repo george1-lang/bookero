@@ -9,6 +9,8 @@ export MAVEN_HOME="/c/Users/adjei/tools/apache-maven-3.9.9"
 export PGBIN="/c/Program Files/PostgreSQL/18/bin"
 export PYTHON_BIN="/c/Users/adjei/AppData/Local/Programs/Python/Python313/python.exe"
 export PATH="$JAVA_HOME/bin:$MAVEN_HOME/bin:/c/Program Files/nodejs:$PGBIN:$PATH"
+# Git Bash does not inherit the Windows system path; stack.sh needs netstat/taskkill.
+export PATH="$PATH:/c/Windows/System32:/c/Windows/System32/WindowsPowerShell/v1.0"
 
 # Local Postgres cluster lives in .localdb (gitignored) on 5433 so it cannot
 # collide with the workstation's own PostgreSQL service on 5432.
@@ -16,6 +18,8 @@ export PGHOST=127.0.0.1
 export PGPORT=5433
 export PGUSER=bookero
 export PGDATABASE=bookero
+# Consumed by the running API only; the Maven surefire config pins tests to
+# bookero_test with system properties so this cannot leak into a test run.
 export SPRING_DATASOURCE_URL="jdbc:postgresql://127.0.0.1:5433/bookero"
 export SPRING_DATASOURCE_USERNAME=bookero
 export SPRING_DATASOURCE_PASSWORD=bookero

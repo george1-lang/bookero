@@ -1,22 +1,34 @@
 package com.bookero.algorithms;
 
-import com.bookero.flight.FlightRepository;
-import com.bookero.inventory.InventoryEntity;
+import com.bookero.flight.FareClassEntity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Closed-form markup from time pressure and cabin fill:
+ *
+ * <pre>
+ *   multiplier = 1 + A*(1 - d/D)^P + B*loadFactor^Q
+ * </pre>
+ *
+ * where {@code d} is days to departure clamped to the booking window {@code D}. The
+ * first term captures the classic late-booking business traveller; the second raises
+ * fares as scarcity grows. The result is clamped to the fare band in {@link Fares}.
+ *
+ * <p>Cheap to evaluate and stateless, which is why it is also the post-booking reprice.
+ */
 @Component
 public class TimePressureHeuristicAlgorithm implements Algorithm {
 
-  private final FlightRepository flightRepository;
-
-  public TimePressureHeuristicAlgorithm(FlightRepository flightRepository) {
-    this.flightRepository = flightRepository;
-  }
+  private static final double A = 0.35;
+  private static final double P = 2.0;
+  private static final double B = 0.25;
+  private static final double Q = 1.5;
+  private static final double BOOKING_WINDOW_DAYS = 30.0;
 
   @Override
   public String key() {
@@ -35,74 +47,48 @@ public class TimePressureHeuristicAlgorithm implements Algorithm {
 
   @Override
   public String description() {
-    return "Adjust price by formula: multiplier = 1 + a·(1 - d/D)^p + b·loadFactor^q, where d=days to departure, D=total days (30).";
+    return "Marks fares up from days-to-departure and load factor using a closed-form "
+        + "multiplier, cheap enough to run on every booking.";
   }
 
   @Override
   public AlgorithmResult execute(AlgorithmContext ctx) {
+    List<PriceUpdate> updates = new ArrayList<>();
     var fareClasses = ctx.getFareClasses();
-    var inventory = ctx.getInventory();
-    var priceUpdates = new ArrayList<PriceUpdate>();
-
-    // Formula parameters
-    double a = 0.3;  // Time pressure coefficient
-    double p = 2.0;  // Time pressure exponent
-    double b = 0.2;  // Load factor coefficient
-    double q = 1.5;  // Load factor exponent
-    int totalDays = 30;
+    double multiplierSum = 0;
+    int flightsPriced = 0;
 
     for (var flightId : ctx.flightIds()) {
-      var flight = flightRepository.findById(flightId).orElse(null);
-      if (flight == null) continue;
+      List<FareClassEntity> fares = fareClasses.getOrDefault(flightId, List.of());
+      if (fares.isEmpty()) {
+        continue;
+      }
 
-      var fares = fareClasses.get(flightId);
-      var inv = inventory.get(flightId);
-      if (fares == null || inv == null) continue;
+      double daysOut = Math.min(ctx.daysToDeparture(flightId), BOOKING_WINDOW_DAYS);
+      double urgency = 1.0 - daysOut / BOOKING_WINDOW_DAYS;
+      double multiplier = 1.0
+          + A * Math.pow(urgency, P)
+          + B * Math.pow(ctx.loadFactor(flightId), Q);
 
-      // Calculate days to departure
-      long daysToDeparture = java.time.temporal.ChronoUnit.DAYS.between(Instant.now(), flight.getDepartAt());
-      daysToDeparture = Math.max(0, daysToDeparture);
+      multiplierSum += multiplier;
+      flightsPriced++;
 
-      // Calculate load factor
-      double loadFactor = (double) (inv.getSeatsTotal() - inv.getSeatsLeft()) / inv.getSeatsTotal();
-      loadFactor = Math.min(1.0, Math.max(0.0, loadFactor));
-
-      // Calculate multiplier
-      double timeComponent = a * Math.pow(1.0 - (double) daysToDeparture / totalDays, p);
-      double loadComponent = b * Math.pow(loadFactor, q);
-      double multiplier = 1.0 + timeComponent + loadComponent;
-
-      // Clamp multiplier
-      multiplier = Math.min(2.0, Math.max(0.5, multiplier));
-
-      // Apply to all fares
-      for (var fare : fares) {
-        BigDecimal newPrice = fare.getBasePrice()
-            .multiply(BigDecimal.valueOf(multiplier))
-            .setScale(2, RoundingMode.HALF_UP);
-
-        if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
-          newPrice = BigDecimal.ONE;
-        }
-
-        if (!fare.getCurrentPrice().equals(newPrice)) {
-          priceUpdates.add(new PriceUpdate(
-              flightId,
-              fare.getFlight().getFlightNo(),
-              fare.getCode(),
-              fare.getCurrentPrice(),
-              newPrice
-          ));
+      for (FareClassEntity fare : fares) {
+        BigDecimal target = Fares.repriceFromBase(fare, multiplier);
+        if (Fares.moved(fare, target)) {
+          updates.add(Fares.update(fare, target));
         }
       }
     }
 
-    Map<String, Object> metrics = Map.ofEntries(
-        Map.entry("faresUpdated", (Object) priceUpdates.size()),
-        Map.entry("formula", (Object) "1 + 0.3*(1-d/30)^2 + 0.2*loadFactor^1.5"),
-        Map.entry("multiplierBand", (Object) "[0.5, 2.0]")
-    );
-
-    return AlgorithmResult.success(0L, BigDecimal.ZERO, priceUpdates, ctx.flightIds().size(), metrics);
+    return AlgorithmResult.success(
+        0L,
+        BigDecimal.ZERO,
+        updates,
+        flightsPriced,
+        Map.of(
+            "formula", "1 + %.2f*(1 - d/%.0f)^%.0f + %.2f*loadFactor^%.1f".formatted(A, BOOKING_WINDOW_DAYS, P, B, Q),
+            "avgMultiplier", flightsPriced == 0 ? 0.0 : multiplierSum / flightsPriced,
+            "faresMoved", updates.size()));
   }
 }

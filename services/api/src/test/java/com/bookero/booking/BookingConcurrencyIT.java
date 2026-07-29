@@ -38,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Oversell protection under contention. Deliberately NOT {@code @Transactional}: the
- * fixture has to be committed before the worker threads — each running its own
- * transaction — can see it, and the pessimistic lock only has meaning across
+ * fixture has to be committed before the worker threads - each running its own
+ * transaction - can see it, and the pessimistic lock only has meaning across
  * separate transactions.
  */
 @SpringBootTest

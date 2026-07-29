@@ -1,0 +1,96 @@
+classDiagram
+  direction TB
+
+  class Algorithm {
+    <<interface>>
+    +key() String
+    +displayName() String
+    +family() String
+    +description() String
+    +execute(AlgorithmContext ctx) AlgorithmResult
+  }
+
+  class AlgorithmRegistry {
+    -byKey Map~String, Algorithm~
+    +get(String key) Algorithm
+    +list() List~Algorithm~
+  }
+
+  class AlgorithmRunService {
+    +execute(String key, List~UUID~ flightIds) AlgorithmRunResponse
+  }
+
+  class AlgorithmRunStore {
+    +runAndRecord(Algorithm algo, List~UUID~ ids) AlgorithmRunResponse
+    +recordFailure(String key, String message, long ms) AlgorithmRunResponse
+    -revenueDeltaAgainstBaseFare(...) BigDecimal
+    -applyPriceUpdates(...) void
+  }
+
+  class AlgorithmContext {
+    +flightIds List~UUID~
+    +getFlights() Map
+    +getFareClasses() Map
+    +getInventory() Map
+    +getDemandSnapshots() Map
+    +getDemandForecast() Optional
+    +demandFor(UUID id) double
+    +loadFactor(UUID id) double
+    +daysToDeparture(UUID id) long
+  }
+
+  class AlgorithmResult {
+    +status String
+    +durationMs Long
+    +revenueDelta BigDecimal
+    +priceUpdates List~PriceUpdate~
+    +flightsAffected Integer
+    +message String
+    +metrics Map
+  }
+
+  class PriceUpdate {
+    +flightId UUID
+    +flightNo String
+    +fareClassCode String
+    +oldPrice BigDecimal
+    +newPrice BigDecimal
+    +seatsAllocated Integer
+  }
+
+  class AlgorithmController {
+    +listAlgorithms() List~AlgorithmDto~
+    +runAlgorithm(String key) AlgorithmRunResponse
+    +listRuns() List~AlgorithmRunResponse~
+  }
+
+  class PricingController {
+    +reprice(RepriceRequest req) AlgorithmRunResponse
+  }
+
+  class BookingCreatedEventListener {
+    +onBookingCreated(BookingCreatedEvent e) void
+  }
+
+  AlgorithmController --> AlgorithmRunService : lab run
+  PricingController --> AlgorithmRunService : live reprice
+  BookingCreatedEventListener --> AlgorithmRunService : post-booking reprice
+  AlgorithmRunService --> AlgorithmRegistry : resolves key
+  AlgorithmRunService --> AlgorithmRunStore : delegates the transaction
+  AlgorithmRunStore --> AlgorithmContext : builds once per run
+  AlgorithmRunStore --> AlgorithmResult : consumes
+  AlgorithmResult o-- PriceUpdate
+  AlgorithmRegistry o-- Algorithm
+
+  Algorithm <|.. BaselineAlgorithm
+  Algorithm <|.. RouteGraphAlgorithm
+  Algorithm <|.. ShortestPathAlgorithm
+  Algorithm <|.. FlightSearchAlgorithm
+  Algorithm <|.. SlotScheduleAlgorithm
+  Algorithm <|.. GreedyProtectionAlgorithm
+  Algorithm <|.. DpSeatProtectAlgorithm
+  Algorithm <|.. RevenueOptimizeAlgorithm
+  Algorithm <|.. TimePressureHeuristicAlgorithm
+  Algorithm <|.. DemandMlAlgorithm
+
+  note for AlgorithmRunService "Single execution path: the Lab, the reprice endpoint and the post-booking hook all enter here, so Lab measurements describe production behaviour."

@@ -2,9 +2,16 @@ package com.bookero.algorithms;
 
 import com.bookero.flight.FareClassEntity;
 import org.springframework.stereotype.Component;
-import java.math.BigDecimal;
-import java.util.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Experimental control: restores every in-scope fare to its published base price.
+ * Every other algorithm is measured against the revenue this produces.
+ */
 @Component
 public class BaselineAlgorithm implements Algorithm {
 
@@ -25,41 +32,29 @@ public class BaselineAlgorithm implements Algorithm {
 
   @Override
   public String description() {
-    return "Reset all in-scope fares to base price. Serves as the control group.";
+    return "Static pricing. Restores every fare to its published base price and holds it "
+        + "there, providing the control against which every dynamic strategy is measured.";
   }
 
   @Override
   public AlgorithmResult execute(AlgorithmContext ctx) {
+    List<PriceUpdate> updates = new ArrayList<>();
     var fareClasses = ctx.getFareClasses();
-    var priceUpdates = new ArrayList<PriceUpdate>();
 
     for (var flightId : ctx.flightIds()) {
-      var fares = fareClasses.get(flightId);
-      if (fares != null) {
-        for (var fare : fares) {
-          if (!fare.getBasePrice().equals(fare.getCurrentPrice())) {
-            priceUpdates.add(new PriceUpdate(
-                flightId,
-                fare.getFlight().getFlightNo(),
-                fare.getCode(),
-                fare.getCurrentPrice(),
-                fare.getBasePrice()
-            ));
-          }
+      for (FareClassEntity fare : fareClasses.getOrDefault(flightId, List.of())) {
+        BigDecimal base = fare.getBasePrice();
+        if (Fares.moved(fare, base)) {
+          updates.add(Fares.update(fare, base));
         }
       }
     }
 
-    Map<String, Object> metrics = Map.of(
-        "faresReset", (Object) priceUpdates.size()
-    );
-
     return AlgorithmResult.success(
         0L,
         BigDecimal.ZERO,
-        priceUpdates,
-        ctx.flightIds().size(),
-        metrics
-    );
+        updates,
+        (int) updates.stream().map(PriceUpdate::flightId).distinct().count(),
+        Map.of("faresReset", updates.size(), "flightsInScope", ctx.flightIds().size()));
   }
 }

@@ -19,10 +19,10 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         UserEntity user = userRepository.findByEmail(request.email())
-            .orElseThrow(() -> ApiException.badRequest("Invalid email or password"));
+            .orElseThrow(() -> ApiException.unauthorized("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw ApiException.badRequest("Invalid email or password");
+            throw ApiException.unauthorized("Invalid email or password");
         }
 
         String token = jwtService.issueToken(user.getId(), user.getEmail(), user.getRole());

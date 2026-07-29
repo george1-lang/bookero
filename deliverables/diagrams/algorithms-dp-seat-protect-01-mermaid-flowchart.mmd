@@ -1,0 +1,11 @@
+flowchart TD
+  Start([DP Seat Protect]) --> Loop["For each flight"]
+  Loop --> GetData["Load fares, inventory, demand"]
+  GetData --> Sort["Sort fares by price descending"]
+  Sort --> DPLoop["For each fare class"]
+  DPLoop --> EstDemand["Estimate demand from snapshots"]
+  EstDemand --> ComputeProtection["Compute protection level from demand score"]
+  ComputeProtection --> UpdateAlloc["Update seats_allocated"]
+  UpdateAlloc --> DPLoop
+  DPLoop --> Return["Collect metrics; return"]
+  Return --> End([Done])

@@ -12,7 +12,7 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
   isAnalyst: () => boolean;
   isTraveler: () => boolean;
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8090";
     try {
       const res = await fetch(`${apiUrl}/api/auth/login`, {
@@ -66,9 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const data: LoginResponse = await res.json();
       sessionStorage.setItem("token", data.token);
-      const userData = { id: "", email: data.email, role: data.role };
+      const userData: User = { id: "", email: data.email, role: data.role };
       setUser(userData);
       sessionStorage.setItem("user", JSON.stringify(userData));
+      return userData;
     } catch (err) {
       throw err;
     }

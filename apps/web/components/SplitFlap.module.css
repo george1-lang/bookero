@@ -1,75 +1,91 @@
-.splitFlap {
-  display: flex;
-  gap: 1px;
+.board {
+  display: inline-flex;
+  gap: 2px;
   font-family: var(--font-mono), "Martian Mono", monospace;
   font-weight: 700;
-  font-size: 20px;
-  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  perspective: 320px;
+}
+
+.sm {
+  font-size: 0.75rem;
+}
+
+.md {
+  font-size: 1.125rem;
+}
+
+.lg {
+  font-size: 1.875rem;
 }
 
 .cell {
   position: relative;
-  width: 28px;
-  height: 36px;
-  background: var(--ink-900);
-  border: 1px solid var(--line);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0.34em 0.22em;
+  min-width: 0.86em;
   color: var(--amber);
-  overflow: hidden;
+  background: linear-gradient(180deg, #14181b 0%, #0a0c0d 49%, #101416 51%, #07090a 100%);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.face {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-style: preserve-3d;
-  transform: translateZ(0);
+.suffix {
+  color: var(--fog-400);
+  font-size: 0.7em;
+}
+
+.glyph {
+  display: block;
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+
+/* Hinge to edge-on and back; the glyph swap happens while the cell is invisible. */
+.flipping .glyph {
+  animation: hinge 260ms ease-in-out both;
+  animation-delay: inherit;
 }
 
 .seam {
   position: absolute;
-  top: 50%;
   left: 0;
   right: 0;
+  top: 50%;
   height: 1px;
-  background: var(--line);
-  z-index: 1;
+  background: rgba(0, 0, 0, 0.65);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+  pointer-events: none;
 }
 
-.flipping .face {
-  animation: flipCell 0.3s ease-in-out;
-}
-
-@keyframes flipCell {
+@keyframes hinge {
   0% {
     transform: rotateX(0deg);
   }
   50% {
-    transform: rotateX(90deg);
+    transform: rotateX(-90deg);
   }
   100% {
-    transform: rotateX(180deg);
+    transform: rotateX(0deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flipping .face {
-    animation: fadeFace 0.3s ease-in-out;
+  .flipping .glyph {
+    animation: dissolve 260ms ease-in-out both;
   }
 
-  @keyframes fadeFace {
-    0% {
+  @keyframes dissolve {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
-      opacity: 0.3;
-    }
-    100% {
-      opacity: 1;
+      opacity: 0.25;
     }
   }
 }

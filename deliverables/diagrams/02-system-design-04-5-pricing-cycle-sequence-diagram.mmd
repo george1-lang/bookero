@@ -1,0 +1,53 @@
+sequenceDiagram
+  participant A as Revenue Analyst
+  participant W as Next.js Web
+  participant S as Spring API
+  participant P as Python Analytics
+  participant DB as PostgreSQL
+  participant T as Traveler
+
+  A->>W: Click "Start Simulation"
+  W->>S: POST /api/simulate
+  S->>DB: INSERT INTO demand_snapshot
+  S-->>W: Simulation created
+
+  A->>W: Click "Trigger Reprice"
+  W->>P: GET /demand/forecast
+  P->>DB: SELECT SUM bookings per flight
+  P-->>W: {flightId: demandScore}[]
+
+  W->>S: POST /api/pricing/reprice<br/>{algorithmKey: "revenue_optimize"}
+  S->>S: Load flights, fare classes,<br/>demand from forecast
+  S->>S: AlgorithmRegistry.get("revenue_optimize")<br/>.execute(context)
+  S->>S: Update fare_class.current_price
+  S->>DB: INSERT INTO algorithm_run
+  S->>DB: INSERT INTO price_history
+  S-->>W: {revenue_delta, duration_ms}
+
+  T->>W: Click "Search Flights"
+  W->>S: GET /api/flights/search?origin=ACC&dest=LAD&date=...
+  S->>DB: SELECT * FROM fare_class<br/>WHERE flight_id IN (...)<br/>AND current_price > 0
+  S-->>T: {flightId, fareClasses: [{code, currentPrice}]}
+
+  T->>W: Click "Book Y class on flight ABC"
+  W->>S: POST /api/bookings<br/>{flightId, fareClassId}
+  S->>DB: BEGIN
+  S->>DB: SELECT inventory FOR UPDATE
+  S->>DB: IF seats_left < 1 THEN ROLLBACK
+  S->>DB: UPDATE inventory SET seats_left -= 1
+  S->>DB: INSERT INTO booking
+  S->>DB: COMMIT
+  S-->>T: {bookingId, paidPrice}
+
+  opt Light reprice (feature flag)
+    S->>S: time_pressure_heuristic.execute()
+    S->>DB: INSERT INTO price_history
+  end
+
+  A->>W: Click "Dashboard"
+  W->>S: GET /api/ops/metrics
+  S->>P: GET /metrics/revenue
+  P->>DB: SUM(booking.paid_price) as revenue
+  P->>DB: COUNT(*) / inventory.seats_total as loadFactor
+  P-->>S: {totalRevenue, loadFactor, avgFare, byDay[]}
+  S-->>W: Metrics rendered

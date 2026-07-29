@@ -12,10 +12,10 @@ public class CurrentUser {
     public static AuthenticatedUser get() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
-            throw ApiException.badRequest("Not authenticated");
+            throw ApiException.unauthorized("Authentication required");
         }
         if (!(auth.getPrincipal() instanceof AuthenticatedUser)) {
-            throw ApiException.badRequest("Invalid authentication principal");
+            throw ApiException.unauthorized("Authentication required");
         }
         return (AuthenticatedUser) auth.getPrincipal();
     }

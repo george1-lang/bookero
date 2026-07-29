@@ -48,11 +48,11 @@ start_web() {
 }
 
 kill_port() {
-  # Windows: resolve the listener PID for a port and terminate the process tree.
-  local port="$1"
-  local pids
-  pids=$(powershell.exe -NoProfile -Command \
-    "(Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue).OwningProcess" 2>/dev/null | tr -d '\r')
+  # Git Bash has no lsof; resolve the Windows listener PID and kill the tree.
+  local port="$1" pids
+  pids=$(netstat.exe -ano 2>/dev/null | grep LISTENING | grep ":$port " | awk '{print $NF}' | tr -dc '0-9
+' | sort -u)
+' | sort -u)
   for pid in $pids; do
     [ -n "$pid" ] && taskkill.exe //PID "$pid" //T //F >/dev/null 2>&1
   done

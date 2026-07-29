@@ -1,3 +1,4 @@
+import { getApiUrl } from "./api";
 import React, { ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -54,9 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<User> => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8090";
     try {
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
+      const res = await fetch(`${getApiUrl()}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

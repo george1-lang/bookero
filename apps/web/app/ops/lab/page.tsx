@@ -35,7 +35,7 @@ export default function LabPage() {
     } else if (sortBy === "duration") {
       return (a.lastDurationMs || 0) - (b.lastDurationMs || 0);
     }
-    return a.key.localeCompare(b.key);
+    return a.displayName.localeCompare(b.displayName);
   });
 
   if (isLoading) {
@@ -83,11 +83,12 @@ export default function LabPage() {
             >
               <div className={styles.cardHeader}>
                 <div>
+                  <div className={styles.algorithmName}>{algo.displayName}</div>
                   <div className={styles.algorithmKey}>{algo.key}</div>
                   <div className={styles.algorithmFamily}>{algo.family}</div>
                 </div>
                 <div className={`${styles.status} ${styles[algo.lastStatus?.toLowerCase() || 'unknown']}`}>
-                  {algo.lastStatus || "—"}
+                  {algo.lastStatus || "-"}
                 </div>
               </div>
 
@@ -97,7 +98,7 @@ export default function LabPage() {
                 <div className={styles.metric}>
                   <div className={styles.metricLabel}>Latency</div>
                   <div className={styles.metricValue}>
-                    {algo.lastDurationMs ? `${algo.lastDurationMs}ms` : "—"}
+                    {algo.lastDurationMs ? `${algo.lastDurationMs}ms` : "-"}
                   </div>
                 </div>
                 <div
@@ -111,7 +112,7 @@ export default function LabPage() {
                   <div className={styles.metricValue}>
                     {algo.lastRevenueDelta
                       ? `${algo.lastRevenueDelta > 0 ? "+" : ""}$${algo.lastRevenueDelta.toFixed(0)}`
-                      : "—"}
+                      : "-"}
                   </div>
                 </div>
                 <div className={styles.metric}>
@@ -119,7 +120,7 @@ export default function LabPage() {
                   <div className={styles.metricValue}>
                     {algo.lastRunAt
                       ? new Date(algo.lastRunAt).toLocaleDateString()
-                      : "—"}
+                      : "-"}
                   </div>
                 </div>
               </div>

@@ -1,0 +1,31 @@
+*ATTENTION* ‼️
+Concerning the computational systems and problem-solving capstone project,
+We will very soon be presenting our projects for *_evaluation_* 
+
+This exercise will be conducted by a group of student evaluators on behalf of Dr. Agyemang, who will be rating, judging and scoring our software solutions based off of certain criteria to be published later headed by the current CSS President *Mensah Isaac Nana Sam* 
+
+The evaluation will take place before the exams begin, in the beginning of August - most likely from *August 10th* to *14th/15th*, right before the exams begin.
+
+A schedule will be sent in due course when it is almost time detailing the exact date and time each group would meet with their assigned evaluator.
+
+So let's do well to have our apps/software fully operational/functional before then.
+
+Remember, it's 3 credit hours, so let's apply all seriousness please - ask for help when you need it. 
+Our marks depend on it 🫡
+
+Have a wonderful rest of your day
+
+Learning emphasis
+Students design
+•	search algorithms
+•	optimization algorithms
+•	shortest path algorithms
+•	scheduling algorithms
+•	greedy algorithms
+•	dynamic programming solutions
+•	graph algorithms
+•	heuristic algorithms
+•	machine learning pipelines
+before coding.
+
+66. Dynamic Pricing Algorithm for Airlines   :  Design revenue-maximizing logic; build a pricing app with revenue analytics.

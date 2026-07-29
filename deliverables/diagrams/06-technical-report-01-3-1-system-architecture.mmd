@@ -1,0 +1,35 @@
+flowchart TB
+  subgraph Web["web (Next.js 16)"]
+    TUI["Traveler UI"]
+    OUI["Ops UI"]
+    LUI["Algorithm Lab"]
+  end
+
+  subgraph API["api (Spring Boot 4.1, Java 21)"]
+    AUTH["Auth<br/>(JWT)"]
+    FLIGHT["Flight Service"]
+    BOOK["Booking Service<br/>(transactional)"]
+    ALGO["Algorithm Registry<br/>(9 keys)"]
+    EXEC["Execution Service<br/>(shared path)"]
+  end
+
+  subgraph PY["analytics (FastAPI, Python 3.13)"]
+    ETL["ETL"]
+    ML["Demand Model<br/>(scikit-learn)"]
+    METRICS["Revenue Metrics"]
+  end
+
+  subgraph DB["PostgreSQL 16"]
+    TABLES["Flights, Fares,<br/>Bookings, Inventory,<br/>Prices, Demands"]
+  end
+
+  TUI -->|search, book| FLIGHT
+  OUI -->|reprice| ALGO
+  LUI -->|run algorithm| ALGO
+  ALGO -->|execute| EXEC
+  EXEC -->|query forecast| ML
+  EXEC -->|r/w state| DB
+  ML -->|train on| DB
+  METRICS -->|query| DB
+  Web -->|fetch metrics| API
+  API -->|proxy| PY

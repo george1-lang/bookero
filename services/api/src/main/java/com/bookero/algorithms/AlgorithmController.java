@@ -1,7 +1,6 @@
 package com.bookero.algorithms;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -50,26 +49,24 @@ public class AlgorithmController {
   }
 
   @PostMapping("/{key}/run")
-  public ResponseEntity<Map<String, Object>> runAlgorithm(
+  public ResponseEntity<AlgorithmRunResponse> runAlgorithm(
       @PathVariable String key,
       @RequestBody(required = false) Map<String, Object> body
   ) {
-    var flightIds = extractFlightIds(body);
-    var run = algorithmRunService.execute(key, flightIds);
-    return ResponseEntity.ok(buildRunResponse(run));
+    return ResponseEntity.ok(algorithmRunService.execute(key, extractFlightIds(body)));
   }
 
   @GetMapping("/runs")
-  public ResponseEntity<List<Map<String, Object>>> listRuns(
+  public ResponseEntity<List<AlgorithmRunResponse>> listRuns(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "50") int size
   ) {
-    var pageable = PageRequest.of(page, size);
-    var pageResult = algorithmRunRepository.findAllByOrderByCreatedAtDesc(pageable);
-    var responses = pageResult.stream()
-        .map(this::buildRunResponse)
+    var runs = algorithmRunRepository
+        .findAllByOrderByCreatedAtDesc(PageRequest.of(page, Math.min(size, 200)))
+        .stream()
+        .map(AlgorithmRunResponse::ofHistory)
         .toList();
-    return ResponseEntity.ok(responses);
+    return ResponseEntity.ok(runs);
   }
 
   private List<UUID> extractFlightIds(Map<String, Object> body) {
@@ -90,17 +87,5 @@ public class AlgorithmController {
     return null;
   }
 
-  private Map<String, Object> buildRunResponse(AlgorithmRunEntity run) {
-    return Map.ofEntries(
-        Map.entry("runId", run.getId()),
-        Map.entry("algorithmKey", run.getAlgorithmKey()),
-        Map.entry("status", run.getStatus()),
-        Map.entry("durationMs", run.getDurationMs()),
-        Map.entry("revenueDelta", run.getRevenueDelta()),
-        Map.entry("flightsAffected", 0),
-        Map.entry("priceUpdates", List.of()),
-        Map.entry("metrics", Map.of()),
-        Map.entry("message", null)
-    );
-  }
+
 }

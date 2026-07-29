@@ -90,8 +90,17 @@ Graph algorithms (shortest path, flow, coloring) require network topology. Rathe
 
 ## Performance Results
 
-| Run | Nodes | Edges | Duration (ms) | Components |
-|-----|-------|-------|-------------|-----------|
-| Small (10 airports) | 10 | 15 | <1 | 1 |
-| Moderate (100 airports) | 100 | 250 | 2 | 1 |
-| Large (500 airports) | 500 | 1200 | 5 | 1 |
+| Metric | Benchmark (ms) | Notes |
+|--------|---:|---|
+| Duration (median) | 193 | Slowest algorithm due to graph construction and analysis |
+| Duration range | 192-371 ms | Max outlier includes full connectivity computation |
+| Nodes | 3,257 | Airports in reference graph (OpenFlights data) |
+| Edges | 37,042 | Routes (directed edges) connecting airports |
+| Connected components | 7 | Disconnected subgraphs (minor: most airports reachable via ACC hub) |
+| Busiest airport | AMS (Amsterdam) | Degree 248 (highly connected hub) |
+| Carrier hub | ACC (Accra) | Designated hub for this airline's operations |
+| Average degree | 22.75 | Routes per airport on average |
+| Fares moved | 0 | This is an analysis algorithm; does not reprice |
+| Revenue delta | N/A | Not applicable (network analysis, not pricing) |
+
+**Note:** `route_graph` is an offline analysis tool, not suitable for real-time repricing. Latency (193 ms) is acceptable for periodic (e.g., daily) network topology updates or analyst dashboards. Algorithm provides reference metrics for other graph-based algorithms (shortest_path, flight_search).

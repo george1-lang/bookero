@@ -10,7 +10,7 @@ const source = resolve(here, "../../../docs/algorithms");
 const target = resolve(here, "../public/docs/algorithms");
 
 if (!existsSync(source)) {
-  console.warn(`[copy-docs] ${source} not found — Lab docs will render placeholders`);
+  console.warn(`[copy-docs] ${source} not found - Lab docs will render placeholders`);
   process.exit(0);
 }
 

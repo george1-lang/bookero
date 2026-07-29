@@ -1,6 +1,6 @@
-# Bookero — BUILD.md (Claude Code build bible)
+# Bookero - BUILD.md (Claude Code build bible)
 
-**Product:** Bookero — single-airline dynamic pricing, booking, revenue analytics  
+**Product:** Bookero - single-airline dynamic pricing, booking, revenue analytics  
 **Topic:** #66 Dynamic Pricing Algorithm for Airlines  
 **Spec:** `docs/superpowers/specs/2026-07-28-bookero-design.md`  
 **Plan:** `docs/superpowers/plans/2026-07-28-bookero.md`  
@@ -13,8 +13,8 @@ Execute this document top-to-bottom. Check off work in the plan file. Commit **o
 
 1. Optimize like a senior engineer: clear modules, no dead code, indexed queries, no N+1, transactional booking, pagination on lists, cache airports/routes where safe.
 2. Correctness first; measure algorithm latency; avoid clever micro-opts that obscure logic.
-3. Sparse comments — invariants, formulas, trade-offs only.
-4. Commit style: `feat|fix|docs|test|chore|refactor(scope): message` — **exactly one file staged per commit**.
+3. Sparse comments - invariants, formulas, trade-offs only.
+4. Commit style: `feat|fix|docs|test|chore|refactor(scope): message` - **exactly one file staged per commit**.
 5. TDD where the plan shows a failing test first; otherwise write tests in the same task before marking done.
 6. No React Native, MongoDB, Supabase, live GDS, or real payments in MVP.
 
@@ -120,7 +120,7 @@ volumes:
 
 ---
 
-## 4. Database schema (Flyway or Liquibase — prefer Flyway)
+## 4. Database schema (Flyway or Liquibase - prefer Flyway)
 
 Create `services/api/src/main/resources/db/migration/V1__init.sql`:
 
@@ -295,7 +295,7 @@ BEGIN
 COMMIT
 ```
 
-Optionally trigger light reprice after book (time_pressure_heuristic) — feature flag default on for demo.
+Optionally trigger light reprice after book (time_pressure_heuristic) - feature flag default on for demo.
 
 ---
 
@@ -318,7 +318,7 @@ Optionally trigger light reprice after book (time_pressure_heuristic) — featur
 
 - Source: [OpenFlights](https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat) and `routes.dat`.
 - Store raw under `data/raw/`.
-- Do not load the entire world into demo flights — ETL full reference tables, then a **seed job** (API or script) creates ~20–40 Bookero flights on a hub network (include ACC if present).
+- Do not load the entire world into demo flights - ETL full reference tables, then a **seed job** (API or script) creates ~20-40 Bookero flights on a hub network (include ACC if present).
 
 ---
 
@@ -348,14 +348,14 @@ Algorithm Lab must show: key, description, last duration_ms, revenue_delta vs ba
 | Key | Family | Location |
 |-----|--------|----------|
 | `baseline` | control | Spring |
-| `route_graph` | Graph | Spring — build adjacency; Lab shows node/edge counts |
-| `shortest_path` | Shortest path | Spring — Dijkstra origin→dest |
-| `flight_search` | Search | Spring — constrained itinerary expansion used by search API |
-| `slot_schedule` | Scheduling | Spring — assign seeded departures to abstract gates/slots |
-| `greedy_protection` | Greedy | Spring — protect Y/J as load rises |
-| `dp_seat_protect` | DP | Spring — EMSR-style or multi-class DP allocation |
-| `revenue_optimize` | Optimization | Spring — uses analytics demand forecast |
-| `time_pressure_heuristic` | Heuristic | Spring — days-to-departure × load factor |
+| `route_graph` | Graph | Spring - build adjacency; Lab shows node/edge counts |
+| `shortest_path` | Shortest path | Spring - Dijkstra origin→dest |
+| `flight_search` | Search | Spring - constrained itinerary expansion used by search API |
+| `slot_schedule` | Scheduling | Spring - assign seeded departures to abstract gates/slots |
+| `greedy_protection` | Greedy | Spring - protect Y/J as load rises |
+| `dp_seat_protect` | DP | Spring - EMSR-style or multi-class DP allocation |
+| `revenue_optimize` | Optimization | Spring - uses analytics demand forecast |
+| `time_pressure_heuristic` | Heuristic | Spring - days-to-departure × load factor |
 | `demand_ml` | ML pipeline | Python train + Spring consume forecasts |
 
 Each gets `docs/algorithms/<key>.md` with: Purpose, Pseudocode, Mermaid flowchart, Complexity, Implementation path, Tests, Performance results table (fill after runs).
@@ -393,11 +393,11 @@ Each gets `docs/algorithms/<key>.md` with: Purpose, Pseudocode, Mermaid flowchar
 - [ ] Analyst can simulate, reprice, view Lab metrics  
 - [ ] Traveler can search, see dynamic price, book without oversell  
 - [ ] All algorithm keys documented (Mermaid + pseudo) + tested + runnable  
-- [ ] Phases 1–6 docs present and consistent with running system  
+- [ ] Phases 1-6 docs present and consistent with running system  
 - [ ] Commit history is conventional and one-file-per-commit  
 
 ---
 
-## 11. Eval demo (5–7 min)
+## 11. Eval demo (5-7 min)
 
 Follow `scripts/demo-walkthrough.md`: login analyst → ETL/seed status → simulate → Lab compare baseline vs dp vs greedy → login traveler → search → book → dashboard refresh.

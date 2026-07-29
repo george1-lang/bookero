@@ -135,8 +135,8 @@ export interface MetricsResponse {
   generatedAt: string;
 }
 
-function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8090";
+export function getApiUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 }
 
 function getToken(): string | null {

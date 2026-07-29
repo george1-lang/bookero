@@ -63,7 +63,7 @@ flowchart TB
   OUI -->|/inventory| INV
 
   LUI -->|/algorithms| ALG
-  LUI -->|/algorithms/{key}/run| ALG
+  LUI -->|"/algorithms/:key/run"| ALG
 
   DASH -->|/api/ops/metrics| PROXY
 
@@ -143,7 +143,6 @@ erDiagram
     string origin_code FK "VARCHAR(8)"
     string dest_code FK "VARCHAR(8)"
     int distance_km "INT"
-    unique "origin_code, dest_code"
   }
 
   FLIGHT {
@@ -151,8 +150,6 @@ erDiagram
     uuid route_id FK
     string flight_no "VARCHAR(16) NOT NULL"
     timestamptz depart_at "TIMESTAMPTZ NOT NULL"
-    index "idx_flight_depart on depart_at"
-    index "idx_flight_route on route_id"
   }
 
   FARE_CLASS {
@@ -162,8 +159,6 @@ erDiagram
     decimal base_price "NUMERIC(12,2)"
     decimal current_price "NUMERIC(12,2)"
     int seats_allocated "INT NOT NULL"
-    unique "flight_id, code"
-    index "idx_fare_class_flight"
   }
 
   INVENTORY {
@@ -186,9 +181,6 @@ erDiagram
     uuid fare_class_id FK
     decimal paid_price "NUMERIC(12,2) NOT NULL"
     timestamptz created_at "TIMESTAMPTZ DEFAULT NOW()"
-    index "idx_booking_user on user_id"
-    index "idx_booking_flight on flight_id"
-    index "idx_booking_created on created_at"
   }
 
   ALGORITHM_RUN {
@@ -199,7 +191,6 @@ erDiagram
     bigint duration_ms "BIGINT"
     decimal revenue_delta "NUMERIC(14,2)"
     timestamptz created_at "TIMESTAMPTZ DEFAULT NOW()"
-    index "idx_algorithm_run_key on algorithm_key, created_at DESC"
   }
 
   PRICE_HISTORY {
@@ -209,7 +200,6 @@ erDiagram
     string fare_class_code "VARCHAR(8) NOT NULL"
     decimal price "NUMERIC(12,2) NOT NULL"
     timestamptz at "TIMESTAMPTZ DEFAULT NOW()"
-    index "idx_price_history_flight on flight_id, at DESC"
   }
 
   DEMAND_SNAPSHOT {
@@ -217,9 +207,26 @@ erDiagram
     uuid flight_id FK
     double demand_score "DOUBLE PRECISION NOT NULL"
     timestamptz at "TIMESTAMPTZ DEFAULT NOW()"
-    index "idx_demand_flight on flight_id, at DESC"
   }
 ```
+
+Indexes and uniqueness constraints are listed separately because they are schema
+objects rather than columns, and `erDiagram` has no notation for them.
+
+| Table | Constraint or index | Columns |
+|---|---|---|
+| `route` | unique | `origin_code, dest_code` |
+| `route` | index | `origin_code`; `dest_code` |
+| `flight` | index | `depart_at`; `route_id` |
+| `fare_class` | unique | `flight_id, code` |
+| `fare_class` | index | `flight_id` |
+| `inventory` | check | `seats_left >= 0` |
+| `booking` | index | `user_id`; `flight_id`; `created_at` |
+| `algorithm_run` | index | `algorithm_key, created_at DESC` |
+| `price_history` | index | `flight_id, at DESC` |
+| `demand_snapshot` | index | `flight_id, at DESC` |
+| `app_user` | unique | `email` |
+
 
 **Integrity constraints:**
 - `booking` decrements `inventory.seats_left` in a transaction (pessimistic lock).
@@ -346,143 +353,101 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
+  direction TB
+
   class Algorithm {
     <<interface>>
     +key() String
     +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-  }
-
-  class AlgorithmContext {
-    -flightIds: UUID[]
-    -demandMap: Map~UUID, Double~
-    -inventory: Map~UUID, Inventory~
-    -fareClasses: Map~UUID, FareClass[]~
-    -timestamp: OffsetDateTime
-  }
-
-  class AlgorithmResult {
-    -durationMs: Long
-    -revenueDelta: BigDecimal
-    -priceUpdates: PriceUpdate[]
-    -status: String
-    -errorMessage: String
-  }
-
-  class PriceUpdate {
-    -flightId: UUID
-    -fareClassCode: String
-    -newPrice: BigDecimal
-    -newSeatsAllocated: Int
+    +family() String
+    +description() String
+    +execute(AlgorithmContext ctx) AlgorithmResult
   }
 
   class AlgorithmRegistry {
-    -registry: Map~String, Algorithm~
-    +get(key: String) Algorithm
+    -byKey Map~String, Algorithm~
+    +get(String key) Algorithm
     +list() List~Algorithm~
   }
 
   class AlgorithmRunService {
-    -algorithmRegistry: AlgorithmRegistry
-    -algorithmRunRepository: AlgorithmRunRepository
-    -priceHistoryRepository: PriceHistoryRepository
-    +execute(key: String, flightIds: UUID[]) AlgorithmRun
-    -persistRun(result: AlgorithmResult) AlgorithmRun
+    +execute(String key, List~UUID~ flightIds) AlgorithmRunResponse
   }
 
-  class PricingController {
-    -algorithmRunService: AlgorithmRunService
-    +reprice(request: RepriceRequest) ResponseEntity~RepriceResponse~
+  class AlgorithmRunStore {
+    +runAndRecord(Algorithm algo, List~UUID~ ids) AlgorithmRunResponse
+    +recordFailure(String key, String message, long ms) AlgorithmRunResponse
+    -revenueDeltaAgainstBaseFare(...) BigDecimal
+    -applyPriceUpdates(...) void
+  }
+
+  class AlgorithmContext {
+    +flightIds List~UUID~
+    +getFlights() Map
+    +getFareClasses() Map
+    +getInventory() Map
+    +getDemandSnapshots() Map
+    +getDemandForecast() Optional
+    +demandFor(UUID id) double
+    +loadFactor(UUID id) double
+    +daysToDeparture(UUID id) long
+  }
+
+  class AlgorithmResult {
+    +status String
+    +durationMs Long
+    +revenueDelta BigDecimal
+    +priceUpdates List~PriceUpdate~
+    +flightsAffected Integer
+    +message String
+    +metrics Map
+  }
+
+  class PriceUpdate {
+    +flightId UUID
+    +flightNo String
+    +fareClassCode String
+    +oldPrice BigDecimal
+    +newPrice BigDecimal
+    +seatsAllocated Integer
   }
 
   class AlgorithmController {
-    -algorithmRegistry: AlgorithmRegistry
-    -algorithmRunService: AlgorithmRunService
     +listAlgorithms() List~AlgorithmDto~
-    +runAlgorithm(key: String) ResponseEntity~AlgorithmRun~
-    +listRuns() List~AlgorithmRun~
+    +runAlgorithm(String key) AlgorithmRunResponse
+    +listRuns() List~AlgorithmRunResponse~
   }
 
-  class BaselineAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
+  class PricingController {
+    +reprice(RepriceRequest req) AlgorithmRunResponse
   }
 
-  class DpSeatProtectAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-    -dpTable: int[][]
-    -fillTable(capacity, fareClasses, demand) void
+  class BookingCreatedEventListener {
+    +onBookingCreated(BookingCreatedEvent e) void
   }
 
-  class GreedyProtectionAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-    -loadFactor: Double
-    -closeClassIfNeeded(fareClass) void
-  }
-
-  class RevenueOptimizeAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-  }
-
-  class TimePressureHeuristicAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-    -daysToDeparture: Long
-    -markupFactor: Double
-  }
-
-  class FlightSearchAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-  }
-
-  class ShortestPathAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-    -dijkstra(graph, origin, dest) Path
-  }
-
-  class RouteGraphAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-    -graph: WeightedGraph
-  }
-
-  class SlotScheduleAlgorithm {
-    +key() String
-    +displayName() String
-    +execute(AlgorithmContext) AlgorithmResult
-    -slots: GateSlot[]
-  }
+  AlgorithmController --> AlgorithmRunService : lab run
+  PricingController --> AlgorithmRunService : live reprice
+  BookingCreatedEventListener --> AlgorithmRunService : post-booking reprice
+  AlgorithmRunService --> AlgorithmRegistry : resolves key
+  AlgorithmRunService --> AlgorithmRunStore : delegates the transaction
+  AlgorithmRunStore --> AlgorithmContext : builds once per run
+  AlgorithmRunStore --> AlgorithmResult : consumes
+  AlgorithmResult o-- PriceUpdate
+  AlgorithmRegistry o-- Algorithm
 
   Algorithm <|.. BaselineAlgorithm
-  Algorithm <|.. DpSeatProtectAlgorithm
+  Algorithm <|.. RouteGraphAlgorithm
+  Algorithm <|.. ShortestPathAlgorithm
+  Algorithm <|.. FlightSearchAlgorithm
+  Algorithm <|.. SlotScheduleAlgorithm
   Algorithm <|.. GreedyProtectionAlgorithm
+  Algorithm <|.. DpSeatProtectAlgorithm
   Algorithm <|.. RevenueOptimizeAlgorithm
   Algorithm <|.. TimePressureHeuristicAlgorithm
-  Algorithm <|.. FlightSearchAlgorithm
-  Algorithm <|.. ShortestPathAlgorithm
-  Algorithm <|.. RouteGraphAlgorithm
-  Algorithm <|.. SlotScheduleAlgorithm
+  Algorithm <|.. DemandMlAlgorithm
 
-  AlgorithmRegistry --> Algorithm
-  AlgorithmRunService --> AlgorithmRegistry
-  AlgorithmRunService --> AlgorithmContext
-  AlgorithmRunService --> AlgorithmResult
-  PricingController --> AlgorithmRunService
-  AlgorithmController --> AlgorithmRegistry
-  AlgorithmController --> AlgorithmRunService
+  note for AlgorithmRunService "Single execution path: the Lab, the reprice endpoint and the post-booking hook all enter here, so Lab measurements describe production behaviour."
 ```
 
 **Key property:** All algorithms implement the same `Algorithm` interface. Both the Algorithm Lab (`POST /api/algorithms/{key}/run`) and live reprice (`POST /api/pricing/reprice`) call `AlgorithmRegistry.get(key).execute(...)`. This shared implementation ensures Lab results are reproducible in production pricing.

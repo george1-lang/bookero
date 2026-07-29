@@ -108,7 +108,7 @@ while the JVM restarts. Mitigations, in order of preference:
 | Limit | Value | Impact on Bookero |
 |---|---|---|
 | Neon storage | 0.5 GB | The OpenFlights load is 6,072 airports and 37,042 routes plus roughly 8,000 bookings. Comfortably inside. |
-| Render memory | 512 MB per service | The JVM must be told about the container, or it is OOM-killed. See 4.2. |
+| Render memory | 512 MB per service | The JVM must be told about the container, or it is OOM-killed. See 4.2. The analytics image installs `requirements.txt` only; test tooling lives in `requirements-dev.txt` and is never shipped. |
 | Render build minutes | Limited per month | The Maven build is the slow one. Avoid repeated pushes that trigger rebuilds. |
 | Render instance-hours | 750 per month | Two services that mostly sleep will fit. Two services awake 24/7 will not. |
 | Vercel bandwidth | 100 GB per month | Irrelevant at demo scale |

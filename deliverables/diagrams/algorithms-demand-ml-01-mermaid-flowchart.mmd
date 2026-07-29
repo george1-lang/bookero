@@ -1,0 +1,24 @@
+flowchart TD
+  Start([Demand ML Request]) --> CheckSnapshots{Any demand snapshots?}
+  
+  CheckSnapshots -->|No| ReturnHeuristic["Return model: heuristic"]
+  CheckSnapshots -->|Yes| FetchHistorical["Fetch all demand_snapshot rows with flight context"]
+  
+  FetchHistorical --> ComputeFeatures["Compute 9 features per snapshot<br/>days_to_departure, load_factor, ...<br/>historical_mean_demand"]
+  
+  ComputeFeatures --> BuildDataFrame["Build X DataFrame and y labels array"]
+  
+  BuildDataFrame --> TSCV["Apply TimeSeriesSplit<br/>n_splits=3 to avoid leakage"]
+  
+  TSCV --> ForEachSplit["For each split:<br/>Impute → Scale → Fit HistGradientBoosting"]
+  
+  ForEachSplit --> EvalMetrics["Evaluate MAE, RMSE, R²<br/>on held-out test fold"]
+  
+  EvalMetrics --> TrainFinal["Train final pipeline on all data"]
+  
+  TrainFinal --> SaveModel["Save to joblib<br/>data/processed/demand_model.joblib"]
+  
+  SaveModel --> ReturnTrained["Return model: gradient_boosting<br/>+ MAE, RMSE, R², samples"]
+  
+  ReturnHeuristic --> End([Done])
+  ReturnTrained --> End

@@ -11,6 +11,9 @@ export PYTHON_BIN="/c/Users/adjei/AppData/Local/Programs/Python/Python313/python
 export PATH="$JAVA_HOME/bin:$MAVEN_HOME/bin:/c/Program Files/nodejs:$PGBIN:$PATH"
 # Git Bash does not inherit the Windows system path; stack.sh needs netstat/taskkill.
 export PATH="$PATH:/c/Windows/System32:/c/Windows/System32/WindowsPowerShell/v1.0"
+# Portable pandoc, used by scripts/build-report-docx.mjs
+export PATH="$PATH:/c/Users/adjei/tools/pandoc-3.10.1"
+export PLANTUML_JAR="/c/Users/adjei/tools/plantuml.jar"
 
 # Local Postgres cluster lives in .localdb (gitignored) on 5433 so it cannot
 # collide with the workstation's own PostgreSQL service on 5432.

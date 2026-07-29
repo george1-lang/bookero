@@ -1,0 +1,18 @@
+flowchart TD
+  Start([Dijkstra]) --> Build["Build distance-weighted graph"]
+  Build --> Init["Initialize distances to INF except source=0"]
+  Init --> EnqueueHub["Enqueue hub with distance 0"]
+  EnqueueHub --> Loop["While queue not empty"]
+  Loop --> Pop["Pop min-distance node u"]
+  Pop --> Visited{"u visited?"}
+  Visited -->|Yes| Loop
+  Visited -->|No| MarkVisited["Mark u visited"]
+  MarkVisited --> ForEdges["For each edge (u,v,w)"]
+  ForEdges --> Relax{"d[u]+w < d[v]?"}
+  Relax -->|Yes| UpdateDist["Update d[v]; enqueue v"]
+  UpdateDist --> IncrementRelax["relaxedEdges++"]
+  Relax -->|No| ForEdges
+  IncrementRelax --> ForEdges
+  ForEdges --> Loop
+  Loop --> Return["Return metrics"]
+  Return --> End([Done])

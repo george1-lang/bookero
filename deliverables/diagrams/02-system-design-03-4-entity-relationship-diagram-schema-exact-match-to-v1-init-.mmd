@@ -1,0 +1,92 @@
+erDiagram
+  AIRPORT ||--o{ ROUTE : origin
+  AIRPORT ||--o{ ROUTE : destination
+  ROUTE ||--o{ FLIGHT : schedules
+  FLIGHT ||--o{ FARE_CLASS : offers
+  FLIGHT ||--|| INVENTORY : has
+  APP_USER ||--o{ BOOKING : places
+  FLIGHT ||--o{ BOOKING : fulfills
+  FARE_CLASS ||--o{ BOOKING : priced_as
+  FLIGHT ||--o{ PRICE_HISTORY : records
+  ALGORITHM_RUN ||--o{ PRICE_HISTORY : produces
+  FLIGHT ||--o{ DEMAND_SNAPSHOT : observes
+
+  AIRPORT {
+    string code PK "VARCHAR(8)"
+    string name UK "TEXT NOT NULL"
+    string city "TEXT"
+    string country "TEXT"
+    double lat "DOUBLE PRECISION"
+    double lon "DOUBLE PRECISION"
+  }
+
+  ROUTE {
+    uuid id PK
+    string origin_code FK "VARCHAR(8)"
+    string dest_code FK "VARCHAR(8)"
+    int distance_km "INT"
+  }
+
+  FLIGHT {
+    uuid id PK
+    uuid route_id FK
+    string flight_no "VARCHAR(16) NOT NULL"
+    timestamptz depart_at "TIMESTAMPTZ NOT NULL"
+  }
+
+  FARE_CLASS {
+    uuid id PK
+    uuid flight_id FK "ON DELETE CASCADE"
+    string code "VARCHAR(8) NOT NULL"
+    decimal base_price "NUMERIC(12,2)"
+    decimal current_price "NUMERIC(12,2)"
+    int seats_allocated "INT NOT NULL"
+  }
+
+  INVENTORY {
+    uuid flight_id PK "REFERENCES flight(id) ON DELETE CASCADE"
+    int seats_total "INT NOT NULL"
+    int seats_left "INT NOT NULL CHECK (seats_left >= 0)"
+  }
+
+  APP_USER {
+    uuid id PK
+    string email UK "TEXT NOT NULL"
+    string password_hash "TEXT NOT NULL"
+    string role "VARCHAR(16) CHECK (role IN ('TRAVELER', 'ANALYST'))"
+  }
+
+  BOOKING {
+    uuid id PK
+    uuid user_id FK
+    uuid flight_id FK
+    uuid fare_class_id FK
+    decimal paid_price "NUMERIC(12,2) NOT NULL"
+    timestamptz created_at "TIMESTAMPTZ DEFAULT NOW()"
+  }
+
+  ALGORITHM_RUN {
+    uuid id PK
+    string algorithm_key "VARCHAR(64) NOT NULL"
+    json params "JSONB"
+    string status "VARCHAR(16) NOT NULL"
+    bigint duration_ms "BIGINT"
+    decimal revenue_delta "NUMERIC(14,2)"
+    timestamptz created_at "TIMESTAMPTZ DEFAULT NOW()"
+  }
+
+  PRICE_HISTORY {
+    uuid id PK
+    uuid flight_id FK
+    uuid algorithm_run_id FK "NULLABLE"
+    string fare_class_code "VARCHAR(8) NOT NULL"
+    decimal price "NUMERIC(12,2) NOT NULL"
+    timestamptz at "TIMESTAMPTZ DEFAULT NOW()"
+  }
+
+  DEMAND_SNAPSHOT {
+    uuid id PK
+    uuid flight_id FK
+    double demand_score "DOUBLE PRECISION NOT NULL"
+    timestamptz at "TIMESTAMPTZ DEFAULT NOW()"
+  }

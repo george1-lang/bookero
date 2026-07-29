@@ -63,7 +63,7 @@ export function MermaidBlock({ chart }: { chart: string }) {
 
   return (
     <figure className={styles.wrap}>
-      <figcaption className={styles.caption}>fig — flowchart</figcaption>
+      <figcaption className={styles.caption}>fig - flowchart</figcaption>
       <div ref={host} className={styles.canvas} role="img" aria-label="Algorithm flowchart" />
     </figure>
   );

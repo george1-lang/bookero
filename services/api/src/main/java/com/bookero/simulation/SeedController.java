@@ -26,7 +26,15 @@ public class SeedController {
      */
     @PostMapping("/seed")
     public ResponseEntity<SeedResponseDto> seed() {
-        SeedResponseDto response = seedService.seed();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(seedService.seed());
+    }
+
+    /**
+     * POST /api/simulate/reset
+     * Wipes the simulated world and re-seeds it. Reference data and users survive.
+     */
+    @PostMapping("/reset")
+    public ResponseEntity<SeedResponseDto> reset() {
+        return ResponseEntity.ok(seedService.reset());
     }
 }

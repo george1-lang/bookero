@@ -1,0 +1,14 @@
+flowchart TD
+  Start([Slot Schedule]) --> Load["Load flights"]
+  Load --> Sort["Sort by departure time"]
+  Sort --> Loop["For each flight"]
+  Loop --> FindSlot["Find available slot"]
+  FindSlot --> Available{"Slot free?"}
+  Available -->|Yes| Assign["Assign to slot"]
+  Available -->|No| Evict["Evict lowest-priority"]
+  Evict --> Reassign["Reassign evicted flight"]
+  Reassign --> Conflict["conflicts++"]
+  Assign --> Loop
+  Conflict --> Loop
+  Loop --> Return["Return metrics"]
+  Return --> End([Done])

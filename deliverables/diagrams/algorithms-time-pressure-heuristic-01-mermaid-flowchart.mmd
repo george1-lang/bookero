@@ -1,0 +1,12 @@
+flowchart TD
+  Start([Time Pressure]) --> Loop["For each flight"]
+  Loop --> CalcDays["Calculate days to departure"]
+  CalcDays --> CalcLoad["Calculate load factor"]
+  CalcLoad --> TimeComp["Compute time component: 0.3*(1-d/30)^2"]
+  TimeComp --> LoadComp["Compute load component: 0.2*loadFactor^1.5"]
+  LoadComp --> Sum["Sum: 1 + timeComp + loadComp"]
+  Sum --> Clamp["Clamp to [0.5, 2.0]"]
+  Clamp --> ApplyFares["Apply multiplier to all fares"]
+  ApplyFares --> Loop
+  Loop --> Return["Return metrics"]
+  Return --> End([Done])

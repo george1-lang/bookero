@@ -5,6 +5,7 @@ const API = process.env.API_BASE_URL ?? "http://localhost:8090";
 
 export default defineConfig({
   testDir: "./tests",
+  globalSetup: "./global-setup.ts",
   // The booking and repricing suites mutate shared inventory, so the whole run is serial.
   fullyParallel: false,
   workers: 1,

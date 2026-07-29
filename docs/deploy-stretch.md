@@ -120,9 +120,47 @@ while the JVM restarts. Mitigations, in order of preference:
 ### 4.1 Database on Neon
 
 1. Create a project at neon.tech. No card required. Pick a region near you.
-2. Copy the connection string, of the form
-   `postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require`.
-3. Nothing else to do. Flyway creates the schema on the API's first boot.
+2. On the project dashboard, open the **Connect** panel (labelled "Connection Details"
+   on some plans). Choose **Connection string**, tick **Show password**, and copy it.
+   To see it again later, or if you lose it, go to **Roles** and use **Reset password**.
+3. Nothing else to do here. Flyway creates the schema on the API's first boot.
+
+#### Reading the connection string
+
+Neon hands you a single URI. It follows a fixed shape:
+
+```
+postgresql://neondb_owner:npg_A1b2C3d4E5f6@ep-cool-frost-12345678.eu-central-1.aws.neon.tech/neondb?sslmode=require
+             └──── user ───┘ └──── password ────┘ └──────────────── host ─────────────────────┘ └ db ┘ └── options ──┘
+```
+
+- **user** is between `//` and the first `:`
+- **password** is between that `:` and the `@`
+- everything after the `@` is host, database and options
+
+Two services consume this differently, which is the part that catches people out:
+
+| Service | Variable | What to paste |
+|---|---|---|
+| `analytics` (Python) | `DATABASE_URL` | The **whole URI**, exactly as Neon gives it |
+| `api` (Spring) | `SPRING_DATASOURCE_URL` | JDBC form with the credentials **removed** |
+| `api` (Spring) | `SPRING_DATASOURCE_USERNAME` | Just the user |
+| `api` (Spring) | `SPRING_DATASOURCE_PASSWORD` | Just the password |
+
+JDBC does not accept credentials inline the way the `postgresql://` URI does, so for the
+Spring service you prefix the host part with `jdbc:postgresql://` and pass the user and
+password as their own variables. Using the example above:
+
+```
+SPRING_DATASOURCE_URL       jdbc:postgresql://ep-cool-frost-12345678.eu-central-1.aws.neon.tech/neondb?sslmode=require
+SPRING_DATASOURCE_USERNAME  neondb_owner
+SPRING_DATASOURCE_PASSWORD  npg_A1b2C3d4E5f6
+
+DATABASE_URL                postgresql://neondb_owner:npg_A1b2C3d4E5f6@ep-cool-frost-12345678.eu-central-1.aws.neon.tech/neondb?sslmode=require
+```
+
+Keep `?sslmode=require`. Neon refuses unencrypted connections, and dropping it produces
+a connection error that does not obviously point at TLS.
 
 ### 4.2 API on Render
 
@@ -150,6 +188,7 @@ The same again with root directory `services/analytics`, plus:
 |---|---|
 | `DATABASE_URL` | `postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require` |
 | `DATA_DIR` | `/tmp/data` |
+| `CORS_ALLOWED_ORIGINS` | `https://bookero.vercel.app` |
 
 `DATA_DIR` must be writable. Render's filesystem is ephemeral, so the cached OpenFlights
 download and the trained model are lost on restart. Both recover on demand: the ETL
@@ -225,6 +264,9 @@ change before the URL is shared beyond an evaluator.
 |---|---|---|
 | `DATABASE_URL` | `postgresql://bookero:bookero@localhost:5432/bookero` | SQLAlchemy connection URL |
 | `DATA_DIR` | `./data` | Writable directory for raw downloads and the trained model |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost:3000` | Comma-separated origins allowed to call analytics directly |
+| `OPENFLIGHTS_AIRPORTS_URL` | GitHub raw airports.dat | Override to pin or mirror the reference data |
+| `OPENFLIGHTS_ROUTES_URL` | GitHub raw routes.dat | Override to pin or mirror the reference data |
 
 ### Web (`apps/web`)
 

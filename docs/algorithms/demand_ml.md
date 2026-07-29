@@ -1,7 +1,7 @@
 # Algorithm: `demand_ml`
 
 **Family:** ML pipeline  
-**Purpose:** Predict demand propensity (0–1 score) per flight using gradient-boosted regression on historical booking and snapshot data.
+**Purpose:** Predict demand propensity (0-1 score) per flight using gradient-boosted regression on historical booking and snapshot data.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ Airlines face uncertain booking demand under time-to-departure pressure and capa
 | `current_load_factor` | (seats_total − seats_left) / seats_total | float ∈ [0,1] | High load factor signals scarcity and demand resilience |
 | `seats_left` | `inventory.seats_left` | int | Direct capacity signal; fewer seats → higher price elasticity |
 | `seats_total` | `inventory.seats_total` | int | Normalizes seat count across different aircraft types |
-| `day_of_week` | weekday(depart_at) | int ∈ [0,6] | Captures day-of-week seasonality (e.g., business travel Tue–Thu) |
+| `day_of_week` | weekday(depart_at) | int ∈ [0,6] | Captures day-of-week seasonality (e.g., business travel Tue-Thu) |
 | `hour_of_departure` | hour(depart_at) | int ∈ [0,23] | Captures time-of-day preference (e.g., morning departures demand higher) |
 | `route_distance_km` | haversine(origin, dest) | int | Distance affects trip type (short-haul business vs. long-haul leisure) |
 | `recent_booking_velocity` | bookings_in_last_N_snapshots | int | Signals acceleration of bookings; high velocity → high latent demand |
@@ -176,7 +176,7 @@ flowchart TD
   - Feature computation: O(S × F) where F = 9 features; F is constant
   - TimeSeriesSplit: 3 folds, so 3 fit/predict cycles
   - HistGradientBoosting: O(S × log S × D) amortized per fold, D = max_depth (5)
-  - **Overall: O(S log S)** — dominated by tree fitting
+  - **Overall: O(S log S)** - dominated by tree fitting
 
 - **Space Complexity:**
   - DataFrame storage: O(S × F) = O(S) since F is constant
@@ -216,10 +216,10 @@ flowchart TD
 ## Tests
 
 **Unit Tests (test_demand.py):**
-- `test_demand_heuristic()` — verify heuristic fallback returns score ∈ [0, 1]
-- `test_demand_forecast_empty_flights()` — empty flight table returns empty forecasts
-- `test_demand_forecast_structure()` — response has correct keys, all scores ∈ [0, 1]
-- `test_demand_train_empty_snapshots()` — no snapshots → returns model: "heuristic"
+- `test_demand_heuristic()` - verify heuristic fallback returns score ∈ [0, 1]
+- `test_demand_forecast_empty_flights()` - empty flight table returns empty forecasts
+- `test_demand_forecast_structure()` - response has correct keys, all scores ∈ [0, 1]
+- `test_demand_train_empty_snapshots()` - no snapshots → returns model: "heuristic"
 
 **Integration Notes:**
 - Tests use SQLite in-memory for offline safety (no external DB required)

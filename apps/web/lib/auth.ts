@@ -29,6 +29,15 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
+export type LoginFailure = "credentials" | "unreachable" | "server";
+
+export class LoginError extends Error {
+  constructor(readonly reason: LoginFailure, readonly status?: number) {
+    super(reason);
+    this.name = "LoginError";
+  }
+}
+
 interface LoginResponse {
   token: string;
   role: UserRole;
@@ -55,24 +64,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string): Promise<User> => {
+    let res: Response;
     try {
-      const res = await fetch(`${getApiUrl()}/api/auth/login`, {
+      res = await fetch(`${getApiUrl()}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) {
-        throw new Error("Login failed");
-      }
-      const data: LoginResponse = await res.json();
-      sessionStorage.setItem("token", data.token);
-      const userData: User = { id: "", email: data.email, role: data.role };
-      setUser(userData);
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      return userData;
-    } catch (err) {
-      throw err;
+    } catch {
+      // fetch only rejects for transport failures: the API being down, DNS, or a
+      // CORS preflight the browser refused. Those are not bad credentials, and
+      // saying so sends people hunting for the wrong problem.
+      throw new LoginError("unreachable");
     }
+
+    if (res.status === 401) throw new LoginError("credentials");
+    if (!res.ok) throw new LoginError("server", res.status);
+
+    const data: LoginResponse = await res.json();
+    sessionStorage.setItem("token", data.token);
+    const userData: User = { id: "", email: data.email, role: data.role };
+    setUser(userData);
+    sessionStorage.setItem("user", JSON.stringify(userData));
+    return userData;
   };
 
   const logout = () => {

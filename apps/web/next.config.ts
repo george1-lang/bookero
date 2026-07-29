@@ -4,17 +4,18 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
-// Vercel builds its own routing and functions from the default output. Forcing
-// standalone there leaves nothing for it to route, which surfaces as a platform
-// 404 on every path. Standalone is only what the Dockerfile needs.
+// Vercel builds its own routing and functions from the default output and traces
+// files itself. Standalone output and a pinned workspace root are only needed for
+// the Docker image and to stop the local build inferring the wrong monorepo root,
+// so both are kept off Vercel.
 const isVercel = Boolean(process.env.VERCEL);
 
-const nextConfig: NextConfig = {
-  ...(isVercel ? {} : { output: "standalone" as const }),
-  // The monorepo carries sibling lockfiles (e2e/), so the workspace root is
-  // pinned rather than inferred.
+const selfHosted: NextConfig = {
+  output: "standalone",
   turbopack: { root: here },
   outputFileTracingRoot: here,
 };
+
+const nextConfig: NextConfig = isVercel ? {} : selfHosted;
 
 export default nextConfig;

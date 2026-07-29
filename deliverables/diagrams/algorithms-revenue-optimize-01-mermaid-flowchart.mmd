@@ -1,0 +1,13 @@
+flowchart TD
+  Start([Revenue Optimize]) --> Loop["For each flight"]
+  Loop --> GetDemand["Get demand forecast (or fallback to heuristic)"]
+  GetDemand --> GridLoop["For each multiplier in [0.8..1.5]"]
+  GridLoop --> CalcSeats["Calculate expected seats sold with elasticity"]
+  CalcSeats --> CalcRev["Calculate revenue"]
+  CalcRev --> Track["Track best revenue and multiplier"]
+  Track --> GridLoop
+  GridLoop --> Apply["Apply best multiplier to all fares"]
+  Apply --> Update["Create price updates"]
+  Update --> Loop
+  Loop --> Return["Return metrics"]
+  Return --> End([Done])

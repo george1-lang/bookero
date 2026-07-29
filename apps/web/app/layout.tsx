@@ -25,7 +25,7 @@ const martianMono = Martian_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bookero — Revenue Operations",
+  title: "Bookero - Revenue Operations",
   description: "Airline dynamic pricing, booking and revenue analytics",
 };
 

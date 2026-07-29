@@ -1,8 +1,8 @@
-# Phase 1: Problem Framing — Bookero Dynamic Pricing System
+# Phase 1: Problem Framing - Bookero Dynamic Pricing System
 
 **Course:** Computational Systems & Problem Solving (Topic #66: Dynamic Pricing Algorithm for Airlines)  
 **Date:** 2026-07-28  
-**Product:** Bookero — single-airline revenue-management system for dynamic pricing, booking, and revenue analytics
+**Product:** Bookero - single-airline revenue-management system for dynamic pricing, booking, and revenue analytics
 
 ---
 
@@ -21,20 +21,20 @@ Airlines operate under structural constraints that make pricing exceptionally di
 Suppose an airline offers a single fare of \$300 for all bookings on a flight with 100 seats and 30 days until departure.
 
 **Scenario A (Static pricing):**
-- Days 1–15: Demand is low; only 40 customers buy at \$300. Seats remain unsold.
-- Days 16–30: Demand spikes. 50 customers are willing to pay \$500, but the airline has only 60 seats left. The airline either:
+- Days 1-15: Demand is low; only 40 customers buy at \$300. Seats remain unsold.
+- Days 16-30: Demand spikes. 50 customers are willing to pay \$500, but the airline has only 60 seats left. The airline either:
   - Accepts \$300 from all remaining demand and leaves 10 seats empty → **spoilage loss of \$3,000**.
   - Turns away the 50 late customers → **dilution loss of \$10,000**.
   
   **Total revenue: \$12,000 (40 × \$300 + 60 × \$300).**
 
 **Scenario B (Dynamic pricing):**
-- Days 1–15: Low demand; offer \$250 to attract leisure. Sell 50 seats.
-- Days 16–30: High demand; raise fare to \$450 for remaining 50 seats. Sell all 50 at premium.
+- Days 1-15: Low demand; offer \$250 to attract leisure. Sell 50 seats.
+- Days 16-30: High demand; raise fare to \$450 for remaining 50 seats. Sell all 50 at premium.
   
   **Total revenue: \$22,500 (50 × \$250 + 50 × \$450).**
 
-The difference of \$10,500 is pure margin—captured only by reprice decisions informed by demand forecasts and inventory levels. This is Bookero's value proposition.
+The difference of \$10,500 is pure margin-captured only by reprice decisions informed by demand forecasts and inventory levels. This is Bookero's value proposition.
 
 ---
 

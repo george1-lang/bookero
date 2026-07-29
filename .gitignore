@@ -36,3 +36,6 @@ apps/web/public/docs/
 .claude/
 tasks/
 services/analytics/data/
+
+# docx build scratch
+deliverables/.report-build/

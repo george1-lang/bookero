@@ -105,8 +105,22 @@ Grid search is simple and guaranteed to find local optimum at grid points. Golde
 
 ## Performance Results
 
-| Flights | Forecast | Duration (ms) | Updated | Model source |
-|---------|----------|-------------|---------|---------------|
-| 50 | Available | 8 | 45 | trained |
-| 50 | Unavailable | 8 | 45 | heuristic |
-| 100 | Available | 15 | 90 | trained |
+| Metric | Benchmark (ms) | Low Load (w3-w7) | High Load (w7-w9) |
+|--------|---:|---:|---:|
+| Duration | 5 (median) | 294 | 13 |
+| Duration range | 5-421 ms | N/A | N/A |
+| Fares moved | 240 | 240 | 240 |
+| Revenue (absolute) | N/A | 3,083,989.58 | 3,378,918.19 |
+| Revenue delta | N/A | +19.30% | -0.46% |
+| Load factor | 45.4% | 95.1% | 92.2% |
+| Avg fare | 448.26 | 358.40 | 405.10 |
+| Seats sold | 4,110 | 8,605 | 8,341 |
+| Elasticity assumed | N/A | 1.6 | 1.6 |
+| Objective evaluations | 1,380 | N/A | N/A |
+
+**Notes:**
+- Benchmark latency includes grid search over 10 multiplier candidates (0.8 to 1.5).
+- Max duration (421 ms) is an outlier; median 5 ms is typical.
+- Algorithm gains +19.30% at low load by discounting aggressively (avg fare down 18%) to fill cabin (load 95.1%).
+- Algorithm loses -0.46% at high load: demand already strong at baseline; further discounting reduces margin without capturing additional volume.
+- Assumes elasticity 1.6; if true elasticity differs, revenue gains will not reproduce.

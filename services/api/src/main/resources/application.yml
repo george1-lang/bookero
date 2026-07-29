@@ -20,9 +20,11 @@ spring:
         order_updates: true
   flyway:
     enabled: true
+  # Virtual threads are left off: the booking path holds a pessimistic row lock while
+  # blocking on JDBC, which pins carrier threads under load rather than yielding.
   threads:
     virtual:
-      enabled: true
+      enabled: false
 
 server:
   port: 8080

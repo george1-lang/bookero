@@ -49,6 +49,17 @@ export async function ensureSeeded(request: APIRequestContext, token: string): P
   return afterRows.length;
 }
 
+/** The flight closest to selling out, so an oversell probe stays small but meaningful. */
+export async function tightestFlight(request: APIRequestContext, token: string) {
+  const res = await request.get(`${API}/api/ops/inventory`, { headers: auth(token) });
+  const rows = await res.json();
+  const open = rows
+    .filter((r: any) => r.seatsLeft > 0)
+    .sort((a: any, b: any) => a.seatsLeft - b.seatsLeft);
+  expect(open[0], "expected at least one flight with seats left").toBeTruthy();
+  return open[0];
+}
+
 /** Picks a flight that still has seats, plus one of its fare classes. */
 export async function bookableFlight(request: APIRequestContext, token: string) {
   const res = await request.get(`${API}/api/ops/inventory`, { headers: auth(token) });

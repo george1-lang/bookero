@@ -9,7 +9,7 @@ import org.springframework.data.domain.Persistable;
 /**
  * Every Bookero entity carries an application-assigned identifier, so Spring Data
  * would otherwise treat each one as detached and route {@code save()} through
- * {@code merge()} — which under Hibernate 7 fails outright for a row that does not
+ * {@code merge()} - which under Hibernate 7 fails outright for a row that does not
  * exist yet, and costs a wasted SELECT for one that does. Tracking persistence
  * explicitly makes {@code save()} a plain insert for new rows.
  */

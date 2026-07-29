@@ -14,10 +14,10 @@ test.describe("analytics service", () => {
     const res = await request.get(`${ANALYTICS}/eda/summary`);
     expect(res.status(), await res.text()).toBe(200);
     const body = await res.json();
-    const counts = body.rowCounts ?? body.counts ?? body;
-    expect(Number(counts.airport ?? counts.airports), "OpenFlights airports must be loaded")
+    const counts = body.tableCounts;
+    expect(Number(counts.airport), "OpenFlights airports must be loaded")
       .toBeGreaterThan(1000);
-    expect(Number(counts.route ?? counts.routes), "OpenFlights routes must be loaded")
+    expect(Number(counts.route), "OpenFlights routes must be loaded")
       .toBeGreaterThan(1000);
   });
 

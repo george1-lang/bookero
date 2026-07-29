@@ -1,7 +1,7 @@
 "use client";
 
 import { SplitFlap } from "@/components/SplitFlap";
-import { useAuth } from "@/lib/auth";
+import { LoginError, useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
@@ -12,6 +12,17 @@ const DEMO_ACCOUNTS = [
   { role: "ANALYST", email: "analyst@bookero.local", blurb: "revenue desk · lab · dashboard" },
   { role: "TRAVELER", email: "traveler@bookero.local", blurb: "search · fares · booking" },
 ] as const;
+
+function describeLoginFailure(err: unknown): string {
+  if (err instanceof LoginError) {
+    if (err.reason === "credentials") return "Invalid email or password.";
+    if (err.reason === "unreachable") {
+      return "Cannot reach the booking service. It may still be starting up; wait a moment and try again.";
+    }
+    return `The booking service returned an error${err.status ? ` (${err.status})` : ""}. Try again shortly.`;
+  }
+  return "Sign in failed. Try again shortly.";
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,8 +44,8 @@ export default function LoginPage() {
       // Route on the role the API returns, never on the shape of the address.
       const authenticated = await login(email, password);
       router.replace(HOME_FOR[authenticated.role]);
-    } catch {
-      setError("Invalid email or password.");
+    } catch (err) {
+      setError(describeLoginFailure(err));
       setIsLoading(false);
     }
   };

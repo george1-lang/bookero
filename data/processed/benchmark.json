@@ -1,0 +1,698 @@
+{
+  "generatedAt": "2026-07-29T02:57:35.559Z",
+  "seed": {
+    "flights": 60,
+    "fareClasses": 240,
+    "routes": 20,
+    "hub": "ACC",
+    "note": "Seeded 60 flights on a ACC hub-and-spoke network"
+  },
+  "simulation": {
+    "demandSnapshots": 60,
+    "syntheticBookings": 4110,
+    "durationMs": 59
+  },
+  "training": {
+    "model": "gradient_boosting",
+    "samples": 60,
+    "features": [
+      "days_to_departure",
+      "current_load_factor",
+      "seats_left",
+      "seats_total",
+      "day_of_week",
+      "hour_of_departure",
+      "route_distance_km",
+      "recent_booking_velocity",
+      "historical_mean_demand_score"
+    ],
+    "mae": 0.11397058842418491,
+    "rmse": 0.1350753849554209,
+    "r2": 0.11312807409248087,
+    "trainedAt": "2026-07-29T02:57:32.169538Z"
+  },
+  "results": [
+    {
+      "key": "baseline",
+      "status": "SUCCESS",
+      "medianMs": 2,
+      "minMs": 2,
+      "maxMs": 3,
+      "revenueDelta": 0,
+      "priceUpdates": 0,
+      "flightsAffected": 0,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "faresReset": 0,
+        "flightsInScope": 60
+      }
+    },
+    {
+      "key": "route_graph",
+      "status": "SUCCESS",
+      "medianMs": 193,
+      "minMs": 192,
+      "maxMs": 371,
+      "revenueDelta": 0,
+      "priceUpdates": 0,
+      "flightsAffected": 0,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "components": 7,
+        "nodes": 3257,
+        "avgDegree": "22.75",
+        "busiestAirportDegree": 248,
+        "busiestAirport": "AMS",
+        "edges": 37042,
+        "carrierHub": "ACC"
+      }
+    },
+    {
+      "key": "shortest_path",
+      "status": "SUCCESS",
+      "medianMs": 188,
+      "minMs": 181,
+      "maxMs": 246,
+      "revenueDelta": 0,
+      "priceUpdates": 0,
+      "flightsAffected": 0,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "originHub": "ACC",
+        "visitedNodes": 3231,
+        "farthestReachableKm": 20428,
+        "relaxedEdges": 4842,
+        "reachableAirports": 3231,
+        "meanShortestPathKm": 9644
+      }
+    },
+    {
+      "key": "flight_search",
+      "status": "SUCCESS",
+      "medianMs": 1,
+      "minMs": 0,
+      "maxMs": 1,
+      "revenueDelta": 0,
+      "priceUpdates": 0,
+      "flightsAffected": 0,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "prunedByConstraint": 40,
+        "maxHops": 2,
+        "expansions": 60,
+        "itinerariesFound": 20,
+        "maxConnectionTimeMinutes": 180
+      }
+    },
+    {
+      "key": "slot_schedule",
+      "status": "SUCCESS",
+      "medianMs": 0,
+      "minMs": 0,
+      "maxMs": 0,
+      "revenueDelta": 0,
+      "priceUpdates": 0,
+      "flightsAffected": 60,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "meanStandUtilisation": "9.20%",
+        "turnaroundMinutes": 45,
+        "standsUsed": 3,
+        "clashesAvoided": 2,
+        "horizonHours": 326,
+        "prepMinutes": 45,
+        "flightsScheduled": 60
+      }
+    },
+    {
+      "key": "greedy_protection",
+      "status": "SUCCESS",
+      "medianMs": 5,
+      "minMs": 3,
+      "maxMs": 6,
+      "revenueDelta": 15633.54,
+      "priceUpdates": 4,
+      "flightsAffected": 4,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "bucketsWithdrawn": 4,
+        "closuresByLowestClass": {
+          "Y": 4
+        },
+        "closureThresholds": [
+          0.55,
+          0.75,
+          0.9
+        ]
+      }
+    },
+    {
+      "key": "dp_seat_protect",
+      "status": "SUCCESS",
+      "medianMs": 8,
+      "minMs": 7,
+      "maxMs": 9,
+      "revenueDelta": -145098.93,
+      "priceUpdates": 240,
+      "flightsAffected": 60,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "tableSize": 91050,
+        "flightsSolved": 60,
+        "protectionLevels": {
+          "BK138": {
+            "J": 4,
+            "M": 5,
+            "B": 9,
+            "Y": 135
+          },
+          "BK139": {
+            "J": 4,
+            "M": 6,
+            "B": 11,
+            "Y": 122
+          },
+          "BK140": {
+            "J": 4,
+            "M": 6,
+            "B": 9,
+            "Y": 123
+          },
+          "BK141": {
+            "J": 2,
+            "M": 2,
+            "B": 4,
+            "Y": 115
+          },
+          "BK242": {
+            "J": 8,
+            "M": 12,
+            "B": 19,
+            "Y": 91
+          },
+          "BK243": {
+            "J": 4,
+            "M": 6,
+            "B": 10,
+            "Y": 154
+          },
+          "BK974": {
+            "J": 6,
+            "M": 9,
+            "B": 14,
+            "Y": 127
+          },
+          "BK975": {
+            "J": 6,
+            "M": 10,
+            "B": 16,
+            "Y": 111
+          },
+          "BK614": {
+            "J": 4,
+            "M": 6,
+            "B": 10,
+            "Y": 122
+          },
+          "BK615": {
+            "J": 6,
+            "M": 9,
+            "B": 14,
+            "Y": 110
+          },
+          "BK616": {
+            "J": 3,
+            "M": 4,
+            "B": 7,
+            "Y": 145
+          },
+          "BK687": {
+            "J": 7,
+            "M": 11,
+            "B": 18,
+            "Y": 140
+          },
+          "BK688": {
+            "J": 2,
+            "M": 3,
+            "B": 5,
+            "Y": 129
+          },
+          "BK701": {
+            "J": 5,
+            "M": 8,
+            "B": 13,
+            "Y": 110
+          },
+          "BK702": {
+            "J": 6,
+            "M": 9,
+            "B": 15,
+            "Y": 144
+          },
+          "BK703": {
+            "J": 6,
+            "M": 8,
+            "B": 14,
+            "Y": 141
+          },
+          "BK136": {
+            "J": 5,
+            "M": 7,
+            "B": 11,
+            "Y": 103
+          },
+          "BK137": {
+            "J": 0,
+            "M": 1,
+            "B": 1,
+            "Y": 121
+          },
+          "BK960": {
+            "J": 5,
+            "M": 8,
+            "B": 13,
+            "Y": 154
+          },
+          "BK961": {
+            "J": 2,
+            "M": 3,
+            "B": 5,
+            "Y": 123
+          },
+          "BK564": {
+            "J": 4,
+            "M": 6,
+            "B": 11,
+            "Y": 114
+          },
+          "BK565": {
+            "J": 9,
+            "M": 14,
+            "B": 23,
+            "Y": 109
+          },
+          "BK308": {
+            "J": 1,
+            "M": 1,
+            "B": 2,
+            "Y": 162
+          },
+          "BK309": {
+            "J": 8,
+            "M": 12,
+            "B": 20,
+            "Y": 127
+          },
+          "BK310": {
+            "J": 3,
+            "M": 5,
+            "B": 8,
+            "Y": 138
+          },
+          "BK469": {
+            "J": 8,
+            "M": 13,
+            "B": 21,
+            "Y": 115
+          },
+          "BK470": {
+            "J": 5,
+            "M": 8,
+            "B": 14,
+            "Y": 133
+          },
+          "BK471": {
+            "J": 7,
+            "M": 10,
+            "B": 17,
+            "Y": 118
+          },
+          "BK472": {
+            "J": 9,
+            "M": 14,
+            "B": 23,
+            "Y": 118
+          },
+          "BK663": {
+            "J": 4,
+            "M": 6,
+            "B": 9,
+            "Y": 105
+          },
+          "BK664": {
+            "J": 5,
+            "M": 8,
+            "B": 13,
+            "Y": 122
+          },
+          "BK665": {
+            "J": 7,
+            "M": 10,
+            "B": 16,
+            "Y": 88
+          },
+          "BK971": {
+            "J": 4,
+            "M": 6,
+            "B": 11,
+            "Y": 150
+          },
+          "BK972": {
+            "J": 4,
+            "M": 6,
+            "B": 10,
+            "Y": 108
+          },
+          "BK973": {
+            "J": 5,
+            "M": 8,
+            "B": 14,
+            "Y": 112
+          },
+          "BK206": {
+            "J": 4,
+            "M": 6,
+            "B": 10,
+            "Y": 102
+          },
+          "BK207": {
+            "J": 5,
+            "M": 8,
+            "B": 13,
+            "Y": 152
+          },
+          "BK208": {
+            "J": 4,
+            "M": 6,
+            "B": 10,
+            "Y": 140
+          },
+          "BK130": {
+            "J": 4,
+            "M": 5,
+            "B": 9,
+            "Y": 112
+          },
+          "BK131": {
+            "J": 6,
+            "M": 9,
+            "B": 14,
+            "Y": 132
+          },
+          "BK132": {
+            "J": 7,
+            "M": 10,
+            "B": 17,
+            "Y": 142
+          },
+          "BK845": {
+            "J": 3,
+            "M": 4,
+            "B": 7,
+            "Y": 120
+          },
+          "BK846": {
+            "J": 6,
+            "M": 10,
+            "B": 16,
+            "Y": 99
+          },
+          "BK847": {
+            "J": 8,
+            "M": 12,
+            "B": 19,
+            "Y": 128
+          },
+          "BK278": {
+            "J": 5,
+            "M": 7,
+            "B": 11,
+            "Y": 146
+          },
+          "BK279": {
+            "J": 9,
+            "M": 14,
+            "B": 23,
+            "Y": 131
+          },
+          "BK280": {
+            "J": 7,
+            "M": 10,
+            "B": 17,
+            "Y": 114
+          },
+          "BK281": {
+            "J": 2,
+            "M": 3,
+            "B": 5,
+            "Y": 142
+          },
+          "BK382": {
+            "J": 4,
+            "M": 7,
+            "B": 11,
+            "Y": 129
+          },
+          "BK383": {
+            "J": 6,
+            "M": 9,
+            "B": 16,
+            "Y": 125
+          },
+          "BK384": {
+            "J": 6,
+            "M": 8,
+            "B": 14,
+            "Y": 93
+          },
+          "BK504": {
+            "J": 4,
+            "M": 6,
+            "B": 9,
+            "Y": 149
+          },
+          "BK505": {
+            "J": 0,
+            "M": 1,
+            "B": 1,
+            "Y": 139
+          },
+          "BK506": {
+            "J": 8,
+            "M": 12,
+            "B": 19,
+            "Y": 95
+          },
+          "BK144": {
+            "J": 8,
+            "M": 13,
+            "B": 21,
+            "Y": 119
+          },
+          "BK145": {
+            "J": 6,
+            "M": 10,
+            "B": 16,
+            "Y": 121
+          },
+          "BK146": {
+            "J": 9,
+            "M": 14,
+            "B": 23,
+            "Y": 130
+          },
+          "BK147": {
+            "J": 2,
+            "M": 3,
+            "B": 5,
+            "Y": 135
+          }
+        },
+        "states": 45525
+      }
+    },
+    {
+      "key": "revenue_optimize",
+      "status": "SUCCESS",
+      "medianMs": 5,
+      "minMs": 5,
+      "maxMs": 421,
+      "revenueDelta": -122391.49,
+      "priceUpdates": 240,
+      "flightsAffected": 60,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "objectiveEvaluations": 1380,
+        "demandSource": "ml_forecast",
+        "elasticity": 1.6,
+        "avgOptimalMultiplier": 0.8225615919726007
+      }
+    },
+    {
+      "key": "time_pressure_heuristic",
+      "status": "SUCCESS",
+      "medianMs": 3,
+      "minMs": 3,
+      "maxMs": 4,
+      "revenueDelta": 415014.46,
+      "priceUpdates": 240,
+      "flightsAffected": 60,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "formula": "1 + 0.35*(1 - d/30)^2 + 0.25*loadFactor^1.5",
+        "avgMultiplier": 1.2826887707366068,
+        "faresMoved": 240
+      }
+    },
+    {
+      "key": "demand_ml",
+      "status": "SUCCESS",
+      "medianMs": 2,
+      "minMs": 2,
+      "maxMs": 2,
+      "revenueDelta": -91742.14,
+      "priceUpdates": 240,
+      "flightsAffected": 60,
+      "flights": 60,
+      "loadFactor": 0.4544,
+      "metrics": {
+        "modelSource": "trained",
+        "avgDemandScore": 0.33254742658464637,
+        "flightsForecast": 60,
+        "faresMoved": 240
+      }
+    }
+  ],
+  "metrics": {
+    "revenueDeltaPct": 0,
+    "avgFare": 448.2635498783455,
+    "seatsTotal": 9045,
+    "byRoute": [
+      {
+        "route": "ACC-JFK",
+        "bookings": 296,
+        "revenue": 395026.23
+      },
+      {
+        "route": "ACC-LHR",
+        "bookings": 325,
+        "revenue": 273978
+      },
+      {
+        "route": "JFK-ACC",
+        "bookings": 203,
+        "revenue": 257006.4
+      },
+      {
+        "route": "LHR-ACC",
+        "bookings": 189,
+        "revenue": 156309.75
+      },
+      {
+        "route": "ACC-CMN",
+        "bookings": 269,
+        "revenue": 144204
+      },
+      {
+        "route": "ACC-FCO",
+        "bookings": 207,
+        "revenue": 141343.2
+      },
+      {
+        "route": "DKR-ACC",
+        "bookings": 190,
+        "revenue": 73058.4
+      },
+      {
+        "route": "ACC-DKR",
+        "bookings": 147,
+        "revenue": 58243.05
+      },
+      {
+        "route": "ACC-OUA",
+        "bookings": 226,
+        "revenue": 42140.5
+      },
+      {
+        "route": "ABJ-ACC",
+        "bookings": 309,
+        "revenue": 40904.03
+      },
+      {
+        "route": "ACC-ROB",
+        "bookings": 163,
+        "revenue": 39179.57
+      },
+      {
+        "route": "ROB-ACC",
+        "bookings": 128,
+        "revenue": 30209.36
+      },
+      {
+        "route": "TML-ACC",
+        "bookings": 215,
+        "revenue": 29782.76
+      },
+      {
+        "route": "LOS-ACC",
+        "bookings": 220,
+        "revenue": 27863
+      },
+      {
+        "route": "ACC-TML",
+        "bookings": 200,
+        "revenue": 27074.2
+      },
+      {
+        "route": "OUA-ACC",
+        "bookings": 145,
+        "revenue": 26652.7
+      },
+      {
+        "route": "ACC-ABJ",
+        "bookings": 189,
+        "revenue": 24825.04
+      },
+      {
+        "route": "KMS-ACC",
+        "bookings": 203,
+        "revenue": 20799.5
+      },
+      {
+        "route": "ACC-LOS",
+        "bookings": 137,
+        "revenue": 18370
+      },
+      {
+        "route": "ACC-KMS",
+        "bookings": 149,
+        "revenue": 15393.5
+      }
+    ],
+    "available": true,
+    "baselineRevenue": 1842363.19,
+    "revenueDelta": 0,
+    "loadFactor": 0.45439469320066334,
+    "revenueByDay": [
+      {
+        "date": "2026-07-29",
+        "revenue": 1842363.19,
+        "bookings": 4110
+      }
+    ],
+    "generatedAt": "2026-07-29T02:57:35.558670Z",
+    "totalRevenue": 1842363.19,
+    "bookingCount": 4110,
+    "seatsSold": 4110
+  }
+}

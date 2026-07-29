@@ -1,0 +1,95 @@
+@startuml bookero-use-case
+' Rendered with the built-in smetana layout engine so no Graphviz install is needed:
+'   java -jar plantuml.jar -tpng -Playout=smetana docs/uml/use-case.puml
+!pragma layout smetana
+
+skinparam backgroundColor #0E1113
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 13
+skinparam ArrowColor #7C8A90
+skinparam ArrowFontColor #B9C4C8
+
+skinparam actor {
+  BorderColor #FFB100
+  BackgroundColor #151A1D
+  FontColor #EDE7DA
+}
+skinparam usecase {
+  BorderColor #FFB100
+  BackgroundColor #151A1D
+  FontColor #EDE7DA
+  BorderThickness 1
+}
+skinparam rectangle {
+  BorderColor #2A3236
+  BackgroundColor #08090A
+  FontColor #FFB100
+  FontStyle bold
+}
+skinparam note {
+  BorderColor #2A3236
+  BackgroundColor #151A1D
+  FontColor #B9C4C8
+}
+
+left to right direction
+
+actor "Traveller" as T
+actor "Revenue Analyst" as A
+actor "Demand Simulator" as S <<system>>
+actor "Analytics Service" as P <<system>>
+
+rectangle "Bookero" {
+  usecase "Sign in" as UC0
+  usecase "Search flights" as UC1
+  usecase "View live fare ladder" as UC2
+  usecase "Book a seat" as UC3
+  usecase "View my bookings" as UC4
+
+  usecase "Seed the flight network" as UC5
+  usecase "Run demand simulation" as UC6
+  usecase "Reprice inventory" as UC7
+  usecase "Compare algorithms in the Lab" as UC8
+  usecase "View revenue dashboard" as UC9
+  usecase "Inspect inventory and load factor" as UC10
+
+  usecase "Generate demand snapshots" as UC11
+  usecase "Forecast demand" as UC12
+  usecase "Compute revenue metrics" as UC13
+  usecase "Reject oversell" as UC14
+}
+
+T --> UC0
+T --> UC1
+T --> UC2
+T --> UC3
+T --> UC4
+
+A --> UC0
+A --> UC5
+A --> UC6
+A --> UC7
+A --> UC8
+A --> UC9
+A --> UC10
+
+S --> UC11
+P --> UC12
+P --> UC13
+
+UC1 ..> UC2 : <<include>>
+UC3 ..> UC2 : <<include>>
+UC3 ..> UC14 : <<extend>>
+UC6 ..> UC11 : <<include>>
+UC7 ..> UC12 : <<include>>
+UC8 ..> UC7 : <<include>>
+UC9 ..> UC13 : <<include>>
+
+note bottom of UC14
+  A booking that would take the
+  cabin below zero seats is refused
+  with HTTP 409 and rolled back.
+end note
+
+@enduml

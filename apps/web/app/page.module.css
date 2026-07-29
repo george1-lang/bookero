@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
-  padding: 40px;
-  overflow-y: auto;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.75rem);
 }
 
 .header {
@@ -285,3 +285,64 @@
   line-height: 1;
 }
 
+
+.routeStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.stripTitle {
+  margin: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.routeChip {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  background: var(--ink-800);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-hi);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-left-color 0.15s ease, background 0.15s ease;
+}
+
+.routeChip:hover {
+  border-left-color: var(--amber);
+  background: var(--ink-700);
+}
+
+.routeChip:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.chipPair {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+.chipPair span {
+  color: var(--fog-400);
+  font-weight: 400;
+}
+
+.chipMeta {
+  font-size: 0.6875rem;
+  color: var(--fog-400);
+}

@@ -108,8 +108,16 @@ Best-first search (greedy PQ) is fast and suitable for interactive search. It is
 
 ## Performance Results
 
-| Flights | Max hops | Duration (ms) | Expansions | Found |
-|---------|----------|-------------|-----------|--------|
-| 50 | 2 | 5 | 50 | 20 |
-| 100 | 2 | 8 | 75 | 30 |
-| 200 | 3 | 12 | 100 | 40 |
+| Metric | Benchmark (ms) | Notes |
+|--------|---:|---|
+| Duration (median) | 1 | Includes PQ operations and constraint checking |
+| Duration range | 0-1 ms | Negligible cost; suitable for synchronous search API |
+| Expansions | 60 | Nodes explored in PQ (one per flight leg considered) |
+| Itineraries found | 20 | Feasible multi-leg paths under max-hops and connection constraints |
+| Pruned by constraint | 40 | Paths rejected due to time/hops constraints |
+| Max hops | 2 | Limits to 2 flight legs (origin->hub->destination typical) |
+| Max connection time (min) | 180 | Minimum 3 hours between connecting flights for safety |
+| Fares moved | 0 | This is an analysis algorithm; does not reprice |
+| Revenue delta | N/A | Not applicable (search algorithm, not pricing) |
+
+**Note:** `flight_search` does not reprice fares. It demonstrates search algorithm performance and is used by the traveler flight-search API endpoint. Revenue impact comes from pricing algorithms (greedy_protection, dp_seat_protect, etc.) that run separately.

@@ -1,0 +1,5 @@
+# Test-only dependencies. Deliberately not in requirements.txt so the runtime
+# image stays smaller, which matters on a 512 MB container.
+-r requirements.txt
+
+pytest==8.4.2

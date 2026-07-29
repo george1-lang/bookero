@@ -1,0 +1,14 @@
+flowchart TD
+  Start([Greedy Protection]) --> Loop["For each flight"]
+  Loop --> CalcLoad["Calculate load factor"]
+  CalcLoad --> Sort["Sort fares by price ascending"]
+  Sort --> Threshold{"Load factor > 0.9?"}
+  Threshold -->|Yes| Close1["Mark 1 cheapest as closed"]
+  Threshold -->|No| Check2{"Load > 0.75?"}
+  Check2 -->|No| AllOpen["All fares open"]
+  Close1 --> Updates["Create price updates"]
+  Check2 -->|Yes| Updates
+  AllOpen --> Updates
+  Updates --> Loop
+  Loop --> Return["Return metrics"]
+  Return --> End([Done])

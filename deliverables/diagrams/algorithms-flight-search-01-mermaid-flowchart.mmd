@@ -1,0 +1,20 @@
+flowchart TD
+  Start([Flight Search]) --> Load["Load open flights"]
+  Load --> Seed["Seed PQ with single-leg itineraries"]
+  Seed --> Loop["While PQ not empty and expansions < MAX"]
+  Loop --> Pop["Pop lowest-cost itinerary"]
+  Pop --> Feasible{"Feasible?"}
+  Feasible -->|Yes| Add["Add to results"]
+  Feasible -->|No| Prune["Mark as pruned"]
+  Add --> ExpandCheck{"Legs < maxHops?"}
+  Prune --> ExpandCheck
+  ExpandCheck -->|Yes| FindNext["Find connecting flights"]
+  ExpandCheck -->|No| Loop
+  FindNext --> Connect{"Can connect?"}
+  Connect -->|Yes| Extend["Create extended itinerary"]
+  Connect -->|No| FindNext
+  Extend --> EnqueueExt["Enqueue to PQ"]
+  EnqueueExt --> FindNext
+  FindNext --> Loop
+  Loop --> Return["Return metrics"]
+  Return --> End([Done])

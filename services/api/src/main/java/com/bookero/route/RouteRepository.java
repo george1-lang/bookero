@@ -13,7 +13,7 @@ public interface RouteRepository extends JpaRepository<RouteEntity, UUID> {
     @Query("SELECT r FROM RouteEntity r WHERE r.origin.code = :originCode")
     List<RouteEntity> findAllByOriginCode(String originCode);
 
-    /** Airport with the most outbound routes — the natural hub when ACC is absent. */
+    /** Airport with the most outbound routes - the natural hub when ACC is absent. */
     @Query("""
         SELECT r.origin.code FROM RouteEntity r
         GROUP BY r.origin.code
